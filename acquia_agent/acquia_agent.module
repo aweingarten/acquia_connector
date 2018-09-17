@@ -442,6 +442,10 @@ function acquia_agent_menu_alter(&$items) {
  * Menu callback for 'admin/config/system/acquia-agent/refresh-status'.
  */
 function acquia_agent_refresh_status() {
+  if (!isset($_GET['token']) || !drupal_valid_token($_GET['token'], 'admin/config/system/acquia-agent/refresh-status')) {
+    return MENU_ACCESS_DENIED;
+  }
+
   // Refresh subscription information, so we are sure about our update status.
   // We send a heartbeat here so that all of our status information gets
   // updated locally via the return data.
