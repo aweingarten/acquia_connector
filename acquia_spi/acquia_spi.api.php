@@ -11,7 +11,6 @@
  * @defgroup acquia_spi Acquia Connector SPI module integrations.
  *
  * Module integrations with the Acquia Insight service.
- *
  */
 
 /**
@@ -26,12 +25,13 @@
  *
  *    Required format 'string' => array().
  */
-function hook_acquia_spi_get() {
-  $data['example'] = array(
-    'result' => TRUE,
+function hook_acquia_spi_get() 
+{
+    $data['example'] = array(
+    'result' => true,
     'value' => '9000',
-  );
-  return $data;
+    );
+    return $data;
 }
 
 /**
@@ -57,18 +57,18 @@ function hook_acquia_spi_get() {
  *  - (int)     severity: The priority level of the custom test. Must be either
  *                0, 1, 2, 4, 8, 16, 32, 64, or 128. Higher severities impact
  *                the Insight score proportionally.
- *
  */
-function hook_acquia_spi_test() {
-  return array(
+function hook_acquia_spi_test() 
+{
+    return array(
     'unique_example' => array(
       'description'    => 'This example test is useful.',
       'solved_message' => 'The test was successful',
       'failed_message' => 'The test has failed',
-      'solved'         => TRUE,
+      'solved'         => true,
       'fix_details'    => 'Please resolve this issue using this fix information.',
       'category'       => 'best_practices',
       'severity'       => 0,
     ),
-  );
+    );
 }
