@@ -2,7 +2,7 @@
 
 namespace Drupal\acquia_connector;
 
-use \Exception;
+use Exception;
 
 /**
  * Class ConnectorException.
@@ -21,7 +21,7 @@ class ConnectorException extends Exception {
    *   Execption code.
    * @param array $custom
    *   Exception messages as key => value.
-   * @param Exception $previous
+   * @param \Exception $previous
    *   The previous exception used for the exception chaining. Since 5.3.0.
    */
   public function __construct($message, $code = 0, $custom = [], Exception $previous = NULL) {

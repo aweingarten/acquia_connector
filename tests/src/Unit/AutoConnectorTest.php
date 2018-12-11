@@ -17,7 +17,7 @@ class AutoConnectorTest extends UnitTestCase {
   /**
    * Tests the happy path:
    *  - when there is not current connection (stored credentials)
-   *  - attempt to connect succeeds
+   *  - attempt to connect succeeds.
    */
   public function testAutoConnect() {
 

@@ -21,27 +21,29 @@ define('ACQUIA_SEARCH_ENVIRONMENT_ID', 'acquia_search_server_1');
  * Implements hook_drush_command().
  */
 function acquia_search_drush_command() {
-  $items = array();
+  $items = [];
 
-  $items['solr-set-derived-key'] = array(
+  $items['solr-set-derived-key'] = [
     'callback' => 'acquia_search_set_derived_key_for_env',
-    'description' => dt('Sets an environment to be active for Acquia search using a specific derived key.
-      You should use your Acquia Identifier and Network Key to set this value.'),
-    'options' => array(
-      'env-id' => array(
+    'description' => dt(
+        'Sets an environment to be active for Acquia search using a specific derived key.
+      You should use your Acquia Identifier and Network Key to set this value.'
+    ),
+    'options' => [
+      'env-id' => [
         'description' => 'Apache Solr environment id.',
-      ),
-      'acquia-id' => array(
+      ],
+      'acquia-id' => [
         'description' => 'Acquia Subscription ID.',
-      ),
-      'acquia-key' => array(
+      ],
+      'acquia-key' => [
         'description' => 'Acquia Subscription Key.',
-      ),
-    ),
-    'examples' => array(
+      ],
+    ],
+    'examples' => [
       'drush solr-set-derived-key --env-id=acquia_search_server_1_1 --acquia-id=AAAA-12345 --acquia-key=abcdefgijklmnopqrstuvw12345' => 'Set this environment to use the following keys.',
-    ),
-  );
+    ],
+  ];
   return $items;
 }
 
@@ -51,8 +53,10 @@ function acquia_search_drush_command() {
 function acquia_search_drush_help($section) {
   switch ($section) {
     case 'drush:solr-set-derived-key':
-      return dt("Sets an environment to be active for Acquia search using a specific derived key.
-      You should use your Acquia Identifier and Network Key to set this value.");
+      return dt(
+        "Sets an environment to be active for Acquia search using a specific derived key.
+      You should use your Acquia Identifier and Network Key to set this value."
+    );
   }
 }
 
@@ -93,10 +97,10 @@ function acquia_search_set_derived_key_for_env() {
 
   // We do not want to send a heartbeat to the server, we only need subscription
   // data.
-  $params = array(
+  $params = [
     'active' => FALSE,
     'no_heartbeat' => 1,
-  );
+  ];
   $subscription = \Drupal::service('acquia_connector.client')->getSubscription($acquia_id, $acquia_key, $params);
   // Check if the subscription was valid.
   if (!is_array($subscription)) {

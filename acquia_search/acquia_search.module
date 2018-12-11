@@ -5,6 +5,7 @@
  * Integration between Acquia Drupal and Acquia's hosted solr search service.
  */
 
+use Drupal\Core\Database\Database;
 use Drupal\acquia_connector\Helper\Storage;
 use Drupal\acquia_connector\Subscription;
 use Drupal\acquia_search\PreferredSearchCoreService;
@@ -76,7 +77,7 @@ function acquia_search_acquia_subscription_status($subscription = FALSE) {
  * @return string
  *   Search server url.
  */
-function acquia_search_get_search_host($subscription = array()) {
+function acquia_search_get_search_host($subscription = []) {
   if (empty($subscription)) {
     $subscription = \Drupal::config('acquia_connector.settings')->get('subscription_data');
   }
@@ -189,7 +190,6 @@ function acquia_search_should_set_read_only_mode() {
   return FALSE;
 }
 
-
 /**
  * Implements hook_search_api_server_load().
  *
@@ -227,6 +227,7 @@ function acquia_search_search_api_server_load($entities) {
  * @param array $backend_config
  *   An array of data obtained from
  *   \Drupal\search_api\Entity\Server->getBackendConfig()
+ *
  * @return bool
  */
 function acquia_search_is_acquia_server($backend_config) {
@@ -246,7 +247,7 @@ function acquia_search_search_api_index_load($entities) {
   // Loop through the Index entities.
   foreach ($entities as &$index) {
 
-    // Check for server-less indexes
+    // Check for server-less indexes.
     // @see https://www.drupal.org/project/acquia_connector/issues/2956737
     $serverId = $index->getServerId();
     if (!isset($serverId) || $serverId == '') {
@@ -302,7 +303,7 @@ function acquia_search_form_search_api_server_status_alter(&$form) {
   }
 
   // Show read-only warning and disable the "Delete all indexed
-  // data on this server" action
+  // data on this server" action.
   acquia_search_server_show_read_only_mode_warning();
 
   $form['actions']['clear']['#disabled'] = TRUE;
@@ -385,21 +386,21 @@ function acquia_search_get_read_only_mode_warning() {
 
   if ($core_service->getListOfPossibleCores()) {
 
-    $item_list = array(
+    $item_list = [
       '#theme' => 'item_list',
       '#items' => $core_service->getListOfPossibleCores(),
-    );
+    ];
     $list = render($item_list);
 
     $msg .= '<p>';
-    $msg .= t('The following Acquia Search Solr index IDs would have worked for your current environment, but could not be found on your Acquia subscription: @list', array('@list' => $list));
+    $msg .= t('The following Acquia Search Solr index IDs would have worked for your current environment, but could not be found on your Acquia subscription: @list', ['@list' => $list]);
     $msg .= '</p>';
 
   }
 
-  $msg .= PHP_EOL . t('To fix this problem, please read <a href="@url">our documentation</a>.', array(
-      '@url' => 'https://docs.acquia.com/acquia-search/multiple-cores'
-    ));
+  $msg .= PHP_EOL . t('To fix this problem, please read <a href="@url">our documentation</a>.', [
+    '@url' => 'https://docs.acquia.com/acquia-search/multiple-cores',
+  ]);
 
   return Markup::create((string) $msg);
 
@@ -409,6 +410,7 @@ function acquia_search_get_read_only_mode_warning() {
  * Returns formatted message about Acquia Search connection details.
  *
  * @param \Drupal\search_api\Entity\Server $server
+ *
  * @return string
  */
 function acquia_search_get_search_status_message(Server $server) {
@@ -446,8 +448,10 @@ function acquia_search_get_overridden_mode_message($override) {
   switch ($override) {
     case ACQUIA_SEARCH_AUTO_OVERRIDE_READ_ONLY:
       return ['#markup' => '<span class="color-warning">' . t('Acquia Search module automatically enforced read-only mode on this connection.') . '</span>'];
+
     case ACQUIA_SEARCH_OVERRIDE_AUTO_SET:
       return t('Acquia Search module automatically selected the proper Solr connection based on the detected environment.');
+
     case ACQUIA_SEARCH_EXISTING_OVERRIDE:
       return ['#markup' => '<span class="color-warning">' . t('Acquia Search module used overrides set from the <strong>acquia_search.settings</strong> configuration object instead of automatically selecting an available Acquia Search Solr connection.') . '</span>'];
   }
@@ -463,7 +467,7 @@ function acquia_search_get_overridden_mode_message($override) {
  */
 function acquia_search_get_server_url_message($configuration) {
   $url = $configuration['scheme'] . '://' . $configuration['host'] . ':' . $configuration['port'] . $configuration['path'];
-  return t('URL: @url', array('@url' => $url));
+  return t('URL: @url', ['@url' => $url]);
 }
 
 /**
@@ -471,16 +475,18 @@ function acquia_search_get_server_url_message($configuration) {
  *
  * @param $server_id
  *   Server ID.
+ *
  * @return \Drupal\Core\StringTranslation\TranslatableMarkup
  */
 function acquia_search_get_server_id_message($server_id) {
-  return t('search_api_solr.module server ID: @id', array('@id' => $server_id));
+  return t('search_api_solr.module server ID: @id', ['@id' => $server_id]);
 }
 
 /**
  * Get message describing authentication status for the given server.
  *
  * @param \Drupal\search_api\Entity\Server $server
+ *
  * @return array|\Drupal\Core\StringTranslation\TranslatableMarkup
  */
 function acquia_search_get_server_auth_check_message($server) {
@@ -488,15 +494,16 @@ function acquia_search_get_server_auth_check_message($server) {
     return t('Requests to Solr core are passing authentication checks.');
   }
 
-  return array(
+  return [
     '#markup' => '<span class="color-error">' . t('Solr core authentication check fails.') . '</span>',
-  );
+  ];
 }
 
 /**
  * Get text describing availability for the given server.
  *
  * @param \Drupal\search_api\Entity\Server $server
+ *
  * @return array|\Drupal\Core\StringTranslation\TranslatableMarkup
  */
 function acquia_search_get_server_availability_message($server) {
@@ -504,9 +511,9 @@ function acquia_search_get_server_availability_message($server) {
     return t('Solr core is currently reachable and up.');
   }
 
-  return array(
+  return [
     '#markup' => '<span class="color-error">' . t('Solr index is currently unreachable.') . '</span>',
-  );
+  ];
 }
 
 /**
@@ -532,13 +539,13 @@ function acquia_search_get_core_service() {
   $sites_foldername = substr($conf_path, strrpos($conf_path, '/') + 1);
   $ah_db_name = '';
   if ($ah_env && $ah_site_name && $ah_site_group) {
-    $options = \Drupal\Core\Database\Database::getConnection()->getConnectionOptions();
+    $options = Database::getConnection()->getConnectionOptions();
     $ah_db_name = $options['database'];
   }
 
   $subscription = \Drupal::config('acquia_connector.settings')->get('subscription_data');
 
-  $available_cores = array();
+  $available_cores = [];
   if (!empty($subscription['heartbeat_data']['search_cores'])) {
     $available_cores = $subscription['heartbeat_data']['search_cores'];
   }
@@ -564,7 +571,9 @@ function acquia_search_theme_registry_alter(&$theme_registry) {
 
 /**
  * Theme override function for Search API index status page.
+ *
  * @param array $variables
+ *
  * @return string
  *   Resulting HTML.
  *
@@ -599,7 +608,9 @@ function acquia_search_theme_search_api_index($variables) {
 
 /**
  * Theme override function for Search API server status page.
+ *
  * @param array $variables
+ *
  * @return string
  *   Resulting HTML.
  *
@@ -629,7 +640,7 @@ function acquia_search_theme_search_api_server($variables) {
 /**
  * Initializes and returns an instance of AcquiaSearchV3ApiClient.
  *
- * @return AcquiaSearchV3ApiClient|false
+ * @return \Drupal\acquia_search\AcquiaSearchV3ApiClient|false
  */
 function acquia_search_get_v3_client() {
   $search_v3_host = \Drupal::state()->get('acquia_search.v3_api_host') ? \Drupal::state()->get('acquia_search.v3_api_host') : 'https://api.sr.acquia.com';
@@ -649,23 +660,24 @@ function acquia_search_get_v3_client() {
  * Retrieves list of search v3 cores.
  *
  * @param string $acquia_identifier
+ *
  * @return array|false
  */
 function acquia_search_get_v3_cores($acquia_identifier) {
   $search_v3_enabled = \Drupal::config('acquia_search.settings')->get('search_v3_enabled');
 
   if (!$search_v3_enabled) {
-    return array();
+    return [];
   }
 
   $search_v3_client = acquia_search_get_v3_client();
   if (!$search_v3_client) {
-    return array();
+    return [];
   }
 
   $search_v3_cores = $search_v3_client->getSearchV3Indexes($acquia_identifier);
   if (!is_array($search_v3_cores) || empty($search_v3_cores)) {
-    return array();
+    return [];
   }
 
   return $search_v3_cores;

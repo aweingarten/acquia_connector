@@ -21,7 +21,7 @@ class AutoConnector {
   /**
    * Holds Storage.
    *
-   * @var Storage
+   * @var \Drupal\acquia_connector\Helper\Storage
    */
   protected $storage;
 
@@ -37,7 +37,7 @@ class AutoConnector {
    *
    * @param Subscription $subscription
    *   Acquia Subscription.
-   * @param Storage $storage
+   * @param \Drupal\acquia_connector\Helper\Storage $storage
    *   Storage.
    * @param array $global_config
    *   Global config.

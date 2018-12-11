@@ -96,10 +96,12 @@ class AcquiaConnectorSpiTest extends WebTestBase {
     global $base_url;
     // Enable any modules required for the test
     // Create and log in our privileged user.
-    $this->privilegedUser = $this->drupalCreateUser(array(
-      'administer site configuration',
-      'access administration pages',
-    ));
+    $this->privilegedUser = $this->drupalCreateUser(
+        [
+          'administer site configuration',
+          'access administration pages',
+        ]
+    );
     $this->drupalLogin($this->privilegedUser);
 
     // Setup variables.
@@ -175,6 +177,9 @@ class AcquiaConnectorSpiTest extends WebTestBase {
     }
   }
 
+  /**
+   *
+   */
   public function testAll() {
     $this->_testAcquiaSpiUi();
     $this->_testAcquiaSpiGet();

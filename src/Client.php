@@ -18,7 +18,7 @@ class Client {
   /**
    * The HTTP client to fetch the feed data with.
    *
-   * @var \GuzzleHttp\Client $client
+   * @var \GuzzleHttp\Client
    */
   protected $client;
 
@@ -53,16 +53,16 @@ class Client {
     $this->config = $config->get('acquia_connector.settings');
     $this->server = $this->config->get('spi.server');
 
-    $this->headers = array(
+    $this->headers = [
       'Content-Type' => 'application/json',
       'Accept' => 'application/json',
-    );
+    ];
 
     $this->client = \Drupal::service('http_client_factory')->fromOptions(
-      [
-        'verify' => (boolean) $this->config->get('spi.ssl_verify'),
-        'http_errors' => FALSE,
-      ]
+        [
+          'verify' => (boolean) $this->config->get('spi.ssl_verify'),
+          'http_errors' => FALSE,
+        ]
     );
   }
 
@@ -79,12 +79,12 @@ class Client {
    *   Credentials array or FALSE.
    */
   public function getSubscriptionCredentials($email, $password) {
-    $body = array('email' => $email);
-    $authenticator = $this->buildAuthenticator($email, array('rpc_version' => ACQUIA_SPI_DATA_VERSION));
-    $data = array(
+    $body = ['email' => $email];
+    $authenticator = $this->buildAuthenticator($email, ['rpc_version' => ACQUIA_SPI_DATA_VERSION]);
+    $data = [
       'body' => $body,
       'authenticator' => $authenticator,
-    );
+    ];
 
     // Don't use nspiCall() - key is not defined yet.
     $communication_setting = $this->request('POST', '/agent-api/subscription/communication', $data);
@@ -92,16 +92,16 @@ class Client {
       $crypt_pass = new CryptConnector($communication_setting['algorithm'], $password, $communication_setting['hash_setting'], $communication_setting['extra_md5']);
       $pass = $crypt_pass->cryptPass();
 
-      $body = array(
+      $body = [
         'email' => $email,
         'pass' => $pass,
         'rpc_version' => ACQUIA_SPI_DATA_VERSION,
-      );
-      $authenticator = $this->buildAuthenticator($pass, array('rpc_version' => ACQUIA_SPI_DATA_VERSION));
-      $data = array(
+      ];
+      $authenticator = $this->buildAuthenticator($pass, ['rpc_version' => ACQUIA_SPI_DATA_VERSION]);
+      $data = [
         'body' => $body,
         'authenticator' => $authenticator,
-      );
+      ];
 
       // Don't use nspiCall() - key is not defined yet.
       $response = $this->request('POST', '/agent-api/subscription/credentials', $data);
@@ -127,10 +127,10 @@ class Client {
    *
    * @throws \Exception
    */
-  public function getSubscription($id, $key, array $body = array()) {
+  public function getSubscription($id, $key, array $body = []) {
     $body['identifier'] = $id;
     // There is an identifier and key, so attempt communication.
-    $subscription = array();
+    $subscription = [];
     \Drupal::state()->set('acquia_subscription_data.timestamp', REQUEST_TIME);
 
     // Include version number information.
@@ -144,7 +144,7 @@ class Client {
 
     // Include Acquia Search for Search API module version number.
     if (\Drupal::moduleHandler()->moduleExists('acquia_search')) {
-      foreach (array('acquia_search', 'search_api', 'search_api_solr') as $name) {
+      foreach (['acquia_search', 'search_api', 'search_api_solr'] as $name) {
         $info = system_get_info('module', $name);
         // Send the version, or at least the core compatibility as a fallback.
         $body['search_version'][$name] = isset($info['version']) ? (string) $info['version'] : (string) $info['core'];
@@ -166,7 +166,7 @@ class Client {
     catch (ConnectorException $e) {
       drupal_set_message(t('Error occurred while retrieving Acquia subscription information. See logs for details.'), 'error');
       if ($e->isCustomized()) {
-        \Drupal::logger('acquia connector')->error($e->getCustomMessage() . '. Response data: @data', array('@data' => json_encode($e->getAllCustomMessages())));
+        \Drupal::logger('acquia connector')->error($e->getCustomMessage() . '. Response data: @data', ['@data' => json_encode($e->getAllCustomMessages())]);
       }
       else {
         \Drupal::logger('acquia connector')->error($e->getMessage());
@@ -190,7 +190,7 @@ class Client {
    * @return array|false
    *   Response result or FALSE.
    */
-  public function sendNspi($id, $key, array $body = array()) {
+  public function sendNspi($id, $key, array $body = []) {
     $body['identifier'] = $id;
 
     try {
@@ -216,7 +216,7 @@ class Client {
    */
   public function getDefinition($apiEndpoint) {
     try {
-      return $this->request('GET', $apiEndpoint, array());
+      return $this->request('GET', $apiEndpoint, []);
     }
     catch (ConnectorException $e) {
       \Drupal::logger('acquia connector')->error($e->getCustomMessage());
@@ -263,10 +263,10 @@ class Client {
    */
   protected function request($method, $path, $data) {
     $uri = $this->server . $path;
-    $options = array(
+    $options = [
       'headers' => $this->headers,
       'body' => Json::encode($data),
-    );
+    ];
 
     try {
       switch ($method) {
@@ -318,8 +318,8 @@ class Client {
    * @return array
    *   Authenticator array.
    */
-  protected function buildAuthenticator($key, $params = array()) {
-    $authenticator = array();
+  protected function buildAuthenticator($key, $params = []) {
+    $authenticator = [];
     if (isset($params['identifier'])) {
       // Put Network ID in authenticator but do not use in hash.
       $authenticator['identifier'] = $params['identifier'];
@@ -350,7 +350,7 @@ class Client {
    *
    * @see http://www.ietf.org/rfc/rfc2104.txt
    */
-  protected function hash($key, $time, $nonce, $params = array()) {
+  protected function hash($key, $time, $nonce, $params = []) {
     $string = $time . ':' . $nonce;
     return CryptConnector::acquiaHash($key, $string);
   }
@@ -390,13 +390,13 @@ class Client {
     $ip = \Drupal::request()->server->get('SERVER_ADDR', '');
     $host = \Drupal::request()->server->get('HTTP_HOST', '');
     $ssl = \Drupal::request()->isSecure();
-    $data = array(
+    $data = [
       'authenticator' => $this->buildAuthenticator($key, $params),
       'ip' => $ip,
       'host' => $host,
       'ssl' => $ssl,
       'body' => $params,
-    );
+    ];
     $data['result'] = $this->request('POST', $method, $data);
     return $data;
   }

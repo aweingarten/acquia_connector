@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains Drupal\Tests\acquia_search\Unit\AcquiaSearchTest.
- */
-
 namespace Drupal\Tests\acquia_search\Unit;
 
 use Drupal\acquia_search\EventSubscriber\SearchSubscriber;
@@ -82,8 +77,8 @@ class AcquiaSearchTest extends UnitTestCase {
       ->setMethods(['getDerivedKey'])
       ->getMock();
     $calculateAuthCookie->expects($this->any())
-          ->method('getDerivedKey')
-          ->willReturn($this->derivedKey);
+      ->method('getDerivedKey')
+      ->willReturn($this->derivedKey);
 
     $authenticator = $calculateAuthCookie->calculateAuthCookie($string, $nonce, $this->derivedKey, $time);
     preg_match('/acquia_solr_hmac=([a-zA-Z0-9]{40});/', $authenticator, $matches);
@@ -142,12 +137,12 @@ class AcquiaSearchTest extends UnitTestCase {
     $hmac = hash_hmac('sha1', $nonce . $string, $this->derivedKey);
 
     // Pass header with an expected pragma.
-    $headers = array('pragma/hmac_digest=' . $hmac . ';');
+    $headers = ['pragma/hmac_digest=' . $hmac . ';'];
     $extracted = $this->searchSubscriber->extractHmac($headers);
     $this->assertEquals($hmac, $extracted, 'The HMAC digest was extracted from the response header.');
 
     // Pass header with a bad pragma.
-    $bad_headers1 = array('pragma/' . $this->randomMachineName());
+    $bad_headers1 = ['pragma/' . $this->randomMachineName()];
     $bad_extracted1 = $this->searchSubscriber->extractHmac($bad_headers1);
     $this->assertEquals('', $bad_extracted1, 'Empty string returned by HMAC extraction function when an invalid pragma is passed.');
 

@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains Drupal\acquia_search\AcquiaSearchV3ApiClient.
- */
-
 namespace Drupal\acquia_search;
 
 use Drupal\Component\Serialization\Json;
@@ -15,24 +10,26 @@ use GuzzleHttp\Exception\RequestException;
  *
  * @package Drupal\acquia_search\
  */
-
 class AcquiaSearchV3ApiClient {
 
   /**
    * The HTTP client to fetch the feed data with.
    *
-   * @var \GuzzleHttp\Client $client
+   * @var \GuzzleHttp\Client
    */
   protected $client;
 
+  /**
+   *
+   */
   public function __construct($host, $api_key, $http_client, $cache) {
     $this->search_v3_host = $host;
     $this->search_v3_api_key = $api_key;
     $this->httpClient = $http_client;
-    $this->headers = array(
+    $this->headers = [
       'Content-Type' => 'application/json',
       'Accept' => 'application/json',
-    );
+    ];
     $this->cache = $cache;
   }
 
@@ -46,7 +43,7 @@ class AcquiaSearchV3ApiClient {
    *   Response array or FALSE
    */
   public function getSearchV3Indexes($network_id) {
-    $result = array();
+    $result = [];
     if ($cache = $this->cache->get('acquia_search.v3indexes')) {
       if (is_array($cache->data) && $cache->expire > time()) {
         return $cache->data;
@@ -56,11 +53,11 @@ class AcquiaSearchV3ApiClient {
     if (is_array($indexes)) {
       if (!empty($indexes)) {
         foreach ($indexes as $index) {
-          $result[] = array(
+          $result[] = [
             'balancer' => $index['host'],
             'core_id' => $index['name'],
-            'version' => 'v3'
-          );
+            'version' => 'v3',
+          ];
         }
       }
       // Cache will be set in both cases, 1. when search v3 cores are found and
@@ -119,17 +116,17 @@ class AcquiaSearchV3ApiClient {
    *   Response array or FALSE.
    */
   public function searchRequest($path) {
-    $data = array(
+    $data = [
       'host' => $this->search_v3_host,
-      'headers' => array(
+      'headers' => [
         'x-api-key' => $this->search_v3_api_key,
-      )
-    );
+      ],
+    ];
     $uri = $data['host'] . $path;
-    $options = array(
+    $options = [
       'headers' => $data['headers'],
       'body' => Json::encode($data),
-    );
+    ];
 
     try {
       $response = $this->httpClient->get($uri, $options);
@@ -141,31 +138,41 @@ class AcquiaSearchV3ApiClient {
       $status_code = $response->getStatusCode();
 
       if ($status_code < 200 || $status_code > 299) {
-        \Drupal::logger('acquia search')->error("Couldn't connect to search v3 API: @message",
-          ['@message' => $response->getReasonPhrase()]);
+        \Drupal::logger('acquia search')->error(
+        "Couldn't connect to search v3 API: @message",
+        ['@message' => $response->getReasonPhrase()]
+        );
         return FALSE;
       }
       return $data;
     }
     catch (RequestException $e) {
       if ($e->getCode() == 401) {
-        \Drupal::logger('acquia search')->error("Couldn't connect to search v3 API:
+        \Drupal::logger('acquia search')->error(
+        "Couldn't connect to search v3 API:
           Received a 401 response from the API indicating that credentials are incorrect.
-          Please validate your credentials. @message", ['@message' => $e->getMessage()]);
+          Please validate your credentials. @message", ['@message' => $e->getMessage()]
+        );
       }
       elseif ($e->getCode() == 404) {
-        \Drupal::logger('acquia search')->error("Couldn't connect to search v3 API:
+        \Drupal::logger('acquia search')->error(
+        "Couldn't connect to search v3 API:
           Received a 404 response from the API indicating that the api host is incorrect.
-          Please validate your host. @message", ['@message' => $e->getMessage()]);
+          Please validate your host. @message", ['@message' => $e->getMessage()]
+        );
       }
       else {
-        \Drupal::logger('acquia search')->error("Couldn't connect to search v3 API: Please
-        validate your api host and credentials. @message", ['@message' => $e->getMessage()]);
+        \Drupal::logger('acquia search')->error(
+        "Couldn't connect to search v3 API: Please
+        validate your api host and credentials. @message", ['@message' => $e->getMessage()]
+        );
       }
     }
     catch (\Exception $e) {
-      \Drupal::logger('acquia search')->error("Couldn't connect to search v3 API: @message",
-        ['@message' => $e->getMessage()]);
+      \Drupal::logger('acquia search')->error(
+        "Couldn't connect to search v3 API: @message",
+        ['@message' => $e->getMessage()]
+      );
     }
 
     return FALSE;

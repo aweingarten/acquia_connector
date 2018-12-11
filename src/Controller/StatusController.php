@@ -39,14 +39,14 @@ class StatusController extends ControllerBase {
 
     $performance_config = $this->config('system.performance');
 
-    $data = array(
+    $data = [
       'version' => '1.0',
-      'data' => array(
+      'data' => [
         'maintenance_mode' => (bool) $this->state()->get('system.maintenance_mode'),
         'cache' => $performance_config->get('cache.page.use_internal'),
         'block_cache' => FALSE,
-      ),
-    );
+      ],
+    ];
 
     return new JsonResponse($data);
   }
@@ -78,16 +78,16 @@ class StatusController extends ControllerBase {
 
     // Log the request if validation failed and debug is enabled.
     if ($connector_config->get('debug')) {
-      $info = array(
+      $info = [
         'sub_data' => $sub_data,
         'sub_uuid_from_data' => $sub_uuid,
         'expected_hash' => $expected_hash,
         'get' => $request->query->all(),
         'server' => $request->server->all(),
         'request' => $request->request->all(),
-      );
+      ];
 
-      \Drupal::logger('acquia_agent')->notice('Site status request: @data', array('@data' => var_export($info, TRUE)));
+      \Drupal::logger('acquia_agent')->notice('Site status request: @data', ['@data' => var_export($info, TRUE)]);
     }
 
     return AccessResultForbidden::forbidden();

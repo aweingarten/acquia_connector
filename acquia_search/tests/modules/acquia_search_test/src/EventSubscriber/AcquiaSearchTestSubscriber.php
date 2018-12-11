@@ -2,11 +2,13 @@
 
 namespace Drupal\acquia_search_test\EventSubscriber;
 
-use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\HttpKernel\Event\GetResponseEvent;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
+/**
+ *
+ */
 class AcquiaSearchTestSubscriber implements EventSubscriberInterface {
 
   /**
@@ -31,12 +33,12 @@ class AcquiaSearchTestSubscriber implements EventSubscriberInterface {
   }
 
   /**
-  * {@inheritdoc}
-  */
+   * {@inheritdoc}
+   */
   public static function getSubscribedEvents() {
     // Add our event with a high priority (1000) to ensure it runs before
     // the Solr connection is decided on.
-    $events[KernelEvents::REQUEST][] = array('checkForOverrides', 1000);
+    $events[KernelEvents::REQUEST][] = ['checkForOverrides', 1000];
     return $events;
   }
 

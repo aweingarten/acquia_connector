@@ -39,7 +39,7 @@ class AcquiaConnectorUnitTest extends UnitTestCase {
   public function testAuthenticators() {
     $identifier = $this->randomMachineName();
     $key = $this->randomMachineName();
-    $params = array('time', 'nonce', 'hash');
+    $params = ['time', 'nonce', 'hash'];
 
     $client = new ClientTest();
     $result = $client->buildAuthenticator($key, $params);
@@ -56,7 +56,7 @@ class AcquiaConnectorUnitTest extends UnitTestCase {
       $this->assertTrue($valid, 'Array has expected keys');
     }
     // Test Client::buildAuthenticator.
-    $result = $client->buildAuthenticator($identifier, array());
+    $result = $client->buildAuthenticator($identifier, []);
     $valid = is_array($result);
     $this->assertTrue($valid, 'Client::buildAuthenticator returns an array');
     if ($valid) {
@@ -75,9 +75,9 @@ class AcquiaConnectorUnitTest extends UnitTestCase {
    */
   public function testIdFromSub() {
     $statusController = new StatusControllerTest();
-    $uuid = $statusController->getIdFromSub(array('uuid' => 'test'));
+    $uuid = $statusController->getIdFromSub(['uuid' => 'test']);
     $this->assertEquals('test', $uuid, 'UUID property identical');
-    $data = array('href' => 'http://example.com/network/uuid/test/dashboard');
+    $data = ['href' => 'http://example.com/network/uuid/test/dashboard'];
     $uuid = $statusController->getIdFromSub($data);
     $this->assertEquals('test', $uuid, 'UUID extracted from href');
   }
@@ -91,12 +91,13 @@ class ClientTest extends Client {
   /**
    * Construction method.
    */
-  public function __construct(){}
+  public function __construct() {
+  }
 
   /**
    * {@inheritdoc}
    */
-  public  function buildAuthenticator($key, $params = array()) {
+  public  function buildAuthenticator($key, $params = []) {
     return parent::buildAuthenticator($key, $params);
   }
 
@@ -110,7 +111,8 @@ class StatusControllerTest extends StatusController {
   /**
    * Construction method.
    */
-  public function __construct(){}
+  public function __construct() {
+  }
 
   /**
    * Gets the subscription UUID from subscription data.

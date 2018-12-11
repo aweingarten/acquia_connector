@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Extends SolrConnectorPluginBase for acquia search.
- */
-
 namespace Drupal\acquia_search\Plugin\SolrConnector;
 
 use Drupal\acquia_connector\Helper\Storage;
@@ -236,8 +231,8 @@ class SearchApiSolrAcquiaConnector extends SolrConnectorPluginBase {
    * {@inheritdoc}
    */
   public function viewSettings() {
-    $uri = Url::fromUri('http://www.acquia.com/products-services/acquia-search', array('absolute' => TRUE));
-    drupal_set_message(t("Search is being provided by @as.", array('@as' => \Drupal::l(t('Acquia Search'), $uri))));
+    $uri = Url::fromUri('http://www.acquia.com/products-services/acquia-search', ['absolute' => TRUE]);
+    drupal_set_message(t("Search is being provided by @as.", ['@as' => \Drupal::l(t('Acquia Search'), $uri)]));
     return parent::viewSettings();
   }
 

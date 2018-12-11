@@ -62,11 +62,13 @@ class AcquiaConnectorModuleTest extends WebTestBase {
 
     global $base_url;
     // Create and log in our privileged user.
-    $this->privilegedUser = $this->drupalCreateUser([
-      'administer site configuration',
-      'access administration pages',
-      'access toolbar',
-    ]);
+    $this->privilegedUser = $this->drupalCreateUser(
+        [
+          'administer site configuration',
+          'access administration pages',
+          'access toolbar',
+        ]
+    );
     $this->drupalLogin($this->privilegedUser);
 
     // Create a user that has a Network subscription.
@@ -142,6 +144,9 @@ class AcquiaConnectorModuleTest extends WebTestBase {
     }
   }
 
+  /**
+   *
+   */
   public function testAll() {
     $this->_testAcquiaConnectorGetConnected();
     $this->_testAcquiaConnectorSubscription();
@@ -258,7 +263,7 @@ class AcquiaConnectorModuleTest extends WebTestBase {
     // Confirm HTTP request count is 0 because without credentials no request
     // should have been made.
     $this->assertIdentical(\Drupal::state()->get('acquia_connector_test_request_count', 0), 0);
-    $check_subscription  = $subscription->update();
+    $check_subscription = $subscription->update();
     \Drupal::state()->resetCache();
     $this->assertFalse($check_subscription, 'Subscription is currently false.');
     // Confirm HTTP request count is still 0.
@@ -276,7 +281,7 @@ class AcquiaConnectorModuleTest extends WebTestBase {
     $is_active = $subscription->isActive();
     $this->assertFalse($is_active, 'Subscription is not active after failed attempt to connect.');
     $this->assertIdentical(\Drupal::state()->get('acquia_connector_test_request_count', 0), 1, 'Still have made only 1 HTTP request');
-    $check_subscription  = $subscription->update();
+    $check_subscription = $subscription->update();
     \Drupal::state()->resetCache();
     $this->assertFalse($check_subscription, 'Subscription is false after failed attempt to connect.');
     $this->assertIdentical(\Drupal::state()->get('acquia_connector_test_request_count', 0), 1, 'Still have made only 1 HTTP request');
