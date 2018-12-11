@@ -12,7 +12,7 @@
 /**
  * Is this an Acquia Drupal install?
  */
-define('IS_ACQUIA_DRUPAL', FALSE);
+define('IS_ACQUIA_DRUPAL', false);
 
 /**
  * Acquia Drupal version information (only used if IS_ACQUIA_DRUPAL).

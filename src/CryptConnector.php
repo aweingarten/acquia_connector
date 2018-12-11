@@ -12,41 +12,44 @@ use Drupal\Core\Password\PhpassHashedPassword;
  *
  * @package Drupal\acquia_connector
  */
-class CryptConnector extends PhpassHashedPassword {
+class CryptConnector extends PhpassHashedPassword
+{
 
-  public $cryptPass;
+    public $cryptPass;
 
-  /**
+    /**
    * Construction method.
    */
-  public function __construct($algo, $password, $setting, $extra_md5) {
-    $this->algo = $algo;
-    $this->password = $password;
-    $this->setting = $setting;
-    $this->extra_md5 = $extra_md5;
-  }
+    public function __construct($algo, $password, $setting, $extra_md5) 
+    {
+        $this->algo = $algo;
+        $this->password = $password;
+        $this->setting = $setting;
+        $this->extra_md5 = $extra_md5;
+    }
 
-  /**
+    /**
    * Crypt pass.
    *
    * @return string
    *   Crypt password.
    */
-  public function cryptPass() {
-    // Server may state that password needs to be hashed with MD5 first.
-    if ($this->extra_md5) {
-      $this->password = md5($this->password);
+    public function cryptPass() 
+    {
+        // Server may state that password needs to be hashed with MD5 first.
+        if ($this->extra_md5) {
+            $this->password = md5($this->password);
+        }
+        $crypt_pass = $this->crypt($this->algo, $this->password, $this->setting);
+
+        if ($this->extra_md5) {
+            $crypt_pass = 'U' . $crypt_pass;
+        }
+
+        return $crypt_pass;
     }
-    $crypt_pass = $this->crypt($this->algo, $this->password, $this->setting);
 
-    if ($this->extra_md5) {
-      $crypt_pass = 'U' . $crypt_pass;
-    }
-
-    return $crypt_pass;
-  }
-
-  /**
+    /**
    * Helper function. Calculate sha1 hash.
    *
    * @param string $key
@@ -57,11 +60,12 @@ class CryptConnector extends PhpassHashedPassword {
    * @return string
    *   Sha1 sgtring.
    */
-  public static function acquiaHash($key, $string) {
-    return sha1((str_pad($key, 64, chr(0x00)) ^ (str_repeat(chr(0x5c), 64))) . pack("H*", sha1((str_pad($key, 64, chr(0x00)) ^ (str_repeat(chr(0x36), 64))) . $string)));
-  }
+    public static function acquiaHash($key, $string) 
+    {
+        return sha1((str_pad($key, 64, chr(0x00)) ^ (str_repeat(chr(0x5c), 64))) . pack("H*", sha1((str_pad($key, 64, chr(0x00)) ^ (str_repeat(chr(0x36), 64))) . $string)));
+    }
 
-  /**
+    /**
    * Derive a key for the solr hmac using a salt, id and key.
    *
    * @param string $salt
@@ -74,9 +78,10 @@ class CryptConnector extends PhpassHashedPassword {
    * @return string
    *   Derived Key.
    */
-  public static function createDerivedKey($salt, $id, $key) {
-    $derivation_string = $id . 'solr' . $salt;
-    return hash_hmac('sha1', str_pad($derivation_string, 80, $derivation_string), $key);
-  }
+    public static function createDerivedKey($salt, $id, $key) 
+    {
+        $derivation_string = $id . 'solr' . $salt;
+        return hash_hmac('sha1', str_pad($derivation_string, 80, $derivation_string), $key);
+    }
 
 }

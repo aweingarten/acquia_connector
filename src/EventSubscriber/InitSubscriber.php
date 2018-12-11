@@ -20,89 +20,94 @@ use Symfony\Component\HttpKernel\Event\FilterControllerEvent;
  *
  * @package Drupal\acquia_connector\EventSubscriber
  */
-class InitSubscriber implements EventSubscriberInterface {
+class InitSubscriber implements EventSubscriberInterface
+{
 
-  /**
+    /**
    * The config factory.
    *
    * @var \Drupal\Core\Config\ConfigFactoryInterface
    */
-  protected $configFactory;
+    protected $configFactory;
 
-  /**
+    /**
    * The state factory.
    *
    * @var \Drupal\Core\KeyValueStore\StateInterface
    */
-  protected $state;
+    protected $state;
 
-  /**
+    /**
    * The cache backend.
    *
    * @var \Drupal\Core\Cache\CacheBackendInterface
    */
-  protected $cache;
+    protected $cache;
 
-  /**
+    /**
    * Construction method.
    */
-  public function __construct(ConfigFactoryInterface $config_factory, StateInterface $state, CacheBackendInterface $cache) {
-    $this->configFactory = $config_factory;
-    $this->state = $state;
-    $this->cache = $cache;
-  }
+    public function __construct(ConfigFactoryInterface $config_factory, StateInterface $state, CacheBackendInterface $cache) 
+    {
+        $this->configFactory = $config_factory;
+        $this->state = $state;
+        $this->cache = $cache;
+    }
 
-  /**
+    /**
    * Display a message asking to connect to the Acquia Network.
    *
    * @param \Symfony\Component\HttpKernel\Event\GetResponseEvent $event
    *   Event.
    */
-  public function onKernelRequest(GetResponseEvent $event) {
+    public function onKernelRequest(GetResponseEvent $event) 
+    {
 
-    acquia_connector_auto_connect();
+        acquia_connector_auto_connect();
 
-    acquia_connector_show_free_tier_promo();
+        acquia_connector_show_free_tier_promo();
 
-  }
+    }
 
-  /**
+    /**
    * Refresh subscription information.
    *
    * @param \Symfony\Component\HttpKernel\Event\FilterControllerEvent $event
    *   Event.
    */
-  public function onKernelController(FilterControllerEvent $event) {
-    if ($event->getRequest()->attributes->get('_route') != 'update.manual_status') {
-      return;
+    public function onKernelController(FilterControllerEvent $event) 
+    {
+        if ($event->getRequest()->attributes->get('_route') != 'update.manual_status') {
+            return;
+        }
+
+        $controller = $event->getController();
+        /*
+         * $controller passed can be either a class or a Closure.
+         * This is not usual in Symfony but it may happen.
+         * If it is a class, it comes in array format
+         */
+        if (!is_array($controller)) {
+            return;
+        }
+
+        if ($controller[0] instanceof UpdateController) {
+            // Refresh subscription information, so we are sure about our update
+            // status. We send a heartbeat here so that all of our status information
+            // gets updated locally via the return data.
+            $subscription = new Subscription();
+            $subscription->update();
+        }
     }
 
-    $controller = $event->getController();
-    /*
-     * $controller passed can be either a class or a Closure.
-     * This is not usual in Symfony but it may happen.
-     * If it is a class, it comes in array format
-     */
-    if (!is_array($controller)) {
-      return;
-    }
-
-    if ($controller[0] instanceof UpdateController) {
-      // Refresh subscription information, so we are sure about our update
-      // status. We send a heartbeat here so that all of our status information
-      // gets updated locally via the return data.
-      $subscription = new Subscription();
-      $subscription->update();
-    }
-  }
-
-  /**
+    /**
    * {@inheritdoc}
    */
-  public static function getSubscribedEvents() {
-    $events[KernelEvents::REQUEST][] = ['onKernelRequest'];
-    $events[KernelEvents::CONTROLLER][] = ['onKernelController'];
-    return $events;
-  }
+    public static function getSubscribedEvents() 
+    {
+        $events[KernelEvents::REQUEST][] = ['onKernelRequest'];
+        $events[KernelEvents::CONTROLLER][] = ['onKernelController'];
+        return $events;
+    }
 
 }
