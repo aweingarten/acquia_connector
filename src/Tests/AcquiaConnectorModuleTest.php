@@ -145,18 +145,18 @@ class AcquiaConnectorModuleTest extends WebTestBase {
   }
 
   /**
-   *
+   * Kicks off all Acquia connector tests.
    */
   public function testAll() {
-    $this->_testAcquiaConnectorGetConnected();
-    $this->_testAcquiaConnectorSubscription();
-    $this->_testAcquiaConnectorSiteStatus();
+    $this->testAcquiaConnectorGetConnected();
+    $this->testAcquiaConnectorSubscription();
+    $this->testAcquiaConnectorSiteStatus();
   }
 
   /**
    * Test get connected.
    */
-  public function _testAcquiaConnectorGetConnected() {
+  private function testAcquiaConnectorGetConnected() {
     // Check for call to get connected.
     $this->drupalGet('admin');
     $this->assertText($this->acquiaConnectorStrings('free'), 'The explanation of services text exists');
@@ -255,7 +255,7 @@ class AcquiaConnectorModuleTest extends WebTestBase {
   /**
    * Test Connector subscription methods.
    */
-  public function _testAcquiaConnectorSubscription() {
+  private function testAcquiaConnectorSubscription() {
     $subscription = new Subscription();
     // Starts as inactive.
     $is_active = $subscription->isActive();
@@ -360,7 +360,7 @@ class AcquiaConnectorModuleTest extends WebTestBase {
   /**
    * Tests the site status callback.
    */
-  public function _testAcquiaConnectorSiteStatus() {
+  private function testAcquiaConnectorSiteStatus() {
     $uuid = '0dee0d07-4032-44ea-a2f2-84182dc10d54';
     $test_url = "https://insight.acquia.com/node/uuid/{$uuid}/dashboard";
     $test_data = [
@@ -395,7 +395,7 @@ class AcquiaConnectorModuleTest extends WebTestBase {
   /**
    * Tests the SPI change form.
    */
-  public function _testSpiChangeForm() {
+  private function testSpiChangeForm() {
     // Connect site on key and id.
     $edit_fields = [
       'acquia_identifier' => $this->acqtestId,
@@ -517,12 +517,4 @@ class AcquiaConnectorModuleTest extends WebTestBase {
  * @package Drupal\acquia_connector\Tests
  */
 class StatusControllerTest extends StatusController {
-
-  /**
-   * {@inheritdoc}
-   */
-  public function getIdFromSub($sub_data) {
-    return parent::getIdFromSub($sub_data);
-  }
-
 }

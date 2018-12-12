@@ -14,16 +14,16 @@ use Drupal\Core\Url;
 use Drupal\Core\Link;
 
 // Version of SPI data format.
-define('ACQUIA_SPI_DATA_VERSION', 3.1);
+define('ACQUIA_CONNECTOR_SPI_DATA_VERSION', 3.1);
 
 /**
  * Identifiers for the method of sending SPI data.
  */
-define('ACQUIA_SPI_METHOD_CALLBACK', 'menu');
-define('ACQUIA_SPI_METHOD_CRON', 'cron');
-define('ACQUIA_SPI_METHOD_DRUSH', 'drush');
-define('ACQUIA_SPI_METHOD_CREDS', 'creds');
-define('ACQUIA_SPI_METHOD_INSIGHT', 'insight');
+define('ACQUIA_CONNECTOR_SPI_METHOD_CALLBACK', 'menu');
+define('ACQUIA_CONNECTOR_SPI_METHOD_CRON', 'cron');
+define('ACQUIA_CONNECTOR_SPI_METHOD_DRUSH', 'drush');
+define('ACQUIA_CONNECTOR_SPI_METHOD_CREDS', 'creds');
+define('ACQUIA_CONNECTOR_SPI_METHOD_INSIGHT', 'insight');
 
 /**
  * Implements hook_help().
@@ -103,7 +103,7 @@ function acquia_connector_cron() {
 
   // Determine if the required interval has passed.
   if ($config->get('spi.use_cron') && ((REQUEST_TIME - $last) > ($interval * 60))) {
-    \Drupal::service('acquia_connector.spi')->sendFullSpi(ACQUIA_SPI_METHOD_CRON);
+    \Drupal::service('acquia_connector.spi')->sendFullSpi(ACQUIA_CONNECTOR_SPI_METHOD_CRON);
   }
 }
 
@@ -269,26 +269,20 @@ function acquia_connector_connection_error_message($errno) {
       case Subscription::NOT_FOUND:
         return t('The identifier you have provided does not exist in the Acquia Subscription or is expired. Please make sure you have used the correct value and try again.');
 
-      break;
       case Subscription::EXPIRED:
         return t('Your Acquia Subscription subscription has expired. Please renew your subscription so that you can resume using Acquia services.');
 
-      break;
       case Subscription::MESSAGE_FUTURE:
         return t('Your server is unable to communicate with the Acquia Subscription due to a problem with your clock settings. For security reasons, we reject messages that are more than @time ahead of the actual time recorded by our servers. Please fix the clock on your server and try again.', ['@time' => \Drupal::service('date.formatter')->formatInterval(Subscription::MESSAGE_LIFETIME)]);
 
-      break;
       case Subscription::MESSAGE_EXPIRED:
         return t('Your server is unable to communicate with the Acquia Subscription due to a problem with your clock settings. For security reasons, we reject messages that are more than @time older than the actual time recorded by our servers. Please fix the clock on your server and try again.', ['@time' => \Drupal::service('date.formatter')->formatInterval(Subscription::MESSAGE_LIFETIME)]);
 
-      break;
       case Subscription::VALIDATION_ERROR:
         return t('The identifier and key you have provided for the Acquia Subscription do not match. Please make sure you have used the correct values and try again.');
 
-      break;
       default:
         return t('There is an error communicating with the Acquia Subscription at this time. Please check your identifier and key and try again.');
-      break;
     }
   }
   return FALSE;
@@ -368,12 +362,13 @@ function acquia_connector_show_free_tier_promo() {
  * Auto-connects the site to Acquia Subscription.
  */
 function acquia_connector_auto_connect() {
+  $config_factory = \Drupal::configFactory();
+
   $subscription = new Subscription();
   $storage = new Storage();
   $user = \Drupal::currentUser();
-  global $config;
 
-  $auto_connector = new AutoConnector($subscription, $storage, $config);
+  $auto_connector = new AutoConnector($subscription, $storage, $config_factory);
   $connected = $auto_connector->connectToAcquia();
 
   if ($connected && $user->hasPermission('administer site configuration')) {

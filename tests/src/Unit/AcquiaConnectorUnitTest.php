@@ -27,13 +27,6 @@ class AcquiaConnectorUnitTest extends UnitTestCase {
   protected $derivedKey;
 
   /**
-   * {@inheritdoc}
-   */
-  protected function setUp() {
-    parent::setUp();
-  }
-
-  /**
    * Test authenticators.
    */
   public function testAuthenticators() {
@@ -80,53 +73,6 @@ class AcquiaConnectorUnitTest extends UnitTestCase {
     $data = ['href' => 'http://example.com/network/uuid/test/dashboard'];
     $uuid = $statusController->getIdFromSub($data);
     $this->assertEquals('test', $uuid, 'UUID extracted from href');
-  }
-
-}
-/**
- * {@inheritdoc}
- */
-class ClientTest extends Client {
-
-  /**
-   * Construction method.
-   */
-  public function __construct() {
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public  function buildAuthenticator($key, $params = []) {
-    return parent::buildAuthenticator($key, $params);
-  }
-
-}
-
-/**
- * Class StatusController.
- */
-class StatusControllerTest extends StatusController {
-
-  /**
-   * Construction method.
-   */
-  public function __construct() {
-  }
-
-  /**
-   * Gets the subscription UUID from subscription data.
-   *
-   * @param array $sub_data
-   *   An array of subscription data.
-   *
-   * @see acquia_agent_settings('acquia_subscription_data')
-   *
-   * @return string
-   *   The UUID taken from the subscription data.
-   */
-  public function getIdFromSub($sub_data) {
-    return parent::getIdFromSub($sub_data);
   }
 
 }

@@ -76,9 +76,9 @@ class SecurityReviewController extends ControllerBase {
    * @return array
    *   Results from running checklist, indexed by module namespace.
    */
-  private function securityReviewRun($checklist = NULL, $log = FALSE, $help = FALSE) {
+  private function securityReviewRun(array $checklist = NULL, $log = FALSE, $help = FALSE) {
     // @todo Use Security Review module if available.
-    return $this->_securityReviewRun($checklist, $log);
+    return $this->securityReviewRunHelper($checklist, $log);
   }
 
   /**
@@ -92,11 +92,11 @@ class SecurityReviewController extends ControllerBase {
    * @return array
    *   Result.
    */
-  private function _securityReviewRun($checklist, $log = FALSE) {
+  private function securityReviewRunHelper(array $checklist, $log = FALSE) {
     $results = [];
     foreach ($checklist as $module => $checks) {
       foreach ($checks as $check_name => $arguments) {
-        $check_result = $this->_securityReviewRunCheck($module, $check_name, $arguments, $log);
+        $check_result = $this->securityReviewRunHelperCheck($module, $check_name, $arguments, $log);
         if (!empty($check_result)) {
           $results[$module][$check_name] = $check_result;
         }
@@ -108,7 +108,7 @@ class SecurityReviewController extends ControllerBase {
   /**
    * Run a single Security Review check.
    */
-  private function _securityReviewRunCheck($module, $check_name, $check, $log, $store = FALSE) {
+  private function securityReviewRunHelperCheck($module, $check_name, $check, $log, $store = FALSE) {
     $return = ['result' => NULL];
     if (isset($check['file'])) {
       // Handle Security Review defining checks for other modules.
@@ -135,10 +135,10 @@ class SecurityReviewController extends ControllerBase {
     if ($log && !is_null($return['result'])) {
       $variables = ['@name' => $check_result['title']];
       if ($check_result['result']) {
-        $this->_securityReviewLog($module, $check_name, '@name check passed', $variables, WATCHDOG_INFO);
+        $this->securityReviewLog($module, $check_name, '@name check passed', $variables, WATCHDOG_INFO);
       }
       else {
-        $this->_securityReviewLog($module, $check_name, '@name check failed', $variables, WATCHDOG_ERROR);
+        $this->securityReviewLog($module, $check_name, '@name check failed', $variables, WATCHDOG_ERROR);
       }
     }
     return $check_result;
@@ -160,7 +160,7 @@ class SecurityReviewController extends ControllerBase {
    *
    * @todo needs review.
    */
-  private function _securityReviewLog($module, $check_name, $message, $variables, $type) {
+  private function securityReviewLog($module, $check_name, $message, array $variables, $type) {
     \Drupal::moduleHandler()
       ->invokeAll(
         'acquia_spi_security_review_log', [

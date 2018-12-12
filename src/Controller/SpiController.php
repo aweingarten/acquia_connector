@@ -104,9 +104,9 @@ class SpiController extends ControllerBase {
 
     $spi = [
     // Used in HMAC validation.
-      'rpc_version'        => ACQUIA_SPI_DATA_VERSION,
+      'rpc_version'        => ACQUIA_CONNECTOR_SPI_DATA_VERSION,
     // Used in Fix it now feature.
-      'spi_data_version'   => ACQUIA_SPI_DATA_VERSION,
+      'spi_data_version'   => ACQUIA_CONNECTOR_SPI_DATA_VERSION,
       'site_key'           => sha1(\Drupal::service('private_key')->get()),
       'site_uuid'          => $this->config('acquia_connector.settings')->get('spi.site_uuid'),
       'env_changed_action' => $this->config('acquia_connector.settings')->get('spi.environment_changed_action'),
@@ -807,7 +807,7 @@ class SpiController extends ControllerBase {
    * @param int $expire
    *   Expire time or null to use default of 1 day.
    */
-  public function dataStoreSet($data, $expire = NULL) {
+  public function dataStoreSet(array $data, $expire = NULL) {
     if (is_null($expire)) {
       $expire = REQUEST_TIME + (60 * 60 * 24);
     }
@@ -825,7 +825,7 @@ class SpiController extends ControllerBase {
    * @return array
    *   Stored data or false if no data is retrievable from storage.
    */
-  public function dataStoreGet($keys) {
+  public function dataStoreGet(array $keys) {
     $store = [];
     foreach ($keys as $key) {
       if ($cache = \Drupal::cache()->get('acquia.spi.' . $key)) {
@@ -996,11 +996,11 @@ class SpiController extends ControllerBase {
   public function send(Request $request) {
     // Mark this page as being uncacheable.
     \Drupal::service('page_cache_kill_switch')->trigger();
-    $method = ACQUIA_SPI_METHOD_CALLBACK;
+    $method = ACQUIA_CONNECTOR_SPI_METHOD_CALLBACK;
 
     // Insight's set variable feature will pass method insight.
-    if ($request->query->has('method') && ($request->query->get('method') === ACQUIA_SPI_METHOD_INSIGHT)) {
-      $method = ACQUIA_SPI_METHOD_INSIGHT;
+    if ($request->query->has('method') && ($request->query->get('method') === ACQUIA_CONNECTOR_SPI_METHOD_INSIGHT)) {
+      $method = ACQUIA_CONNECTOR_SPI_METHOD_INSIGHT;
     }
 
     $response = $this->sendFullSpi($method);
@@ -1030,7 +1030,7 @@ class SpiController extends ControllerBase {
    * @param array $response
    *   Response array from NSPI.
    */
-  public function spiProcessMessages($response) {
+  public function spiProcessMessages(array $response) {
     if (empty($response['body'])) {
       drupal_set_message($this->t('Error sending SPI data. Consult the logs for more information.'), 'error');
       return;
@@ -1066,7 +1066,7 @@ class SpiController extends ControllerBase {
    * @param array $spi_response
    *   Array response from SpiController->send().
    */
-  private function handleServerResponse($spi_response) {
+  private function handleServerResponse(array $spi_response) {
 
     $config_set = \Drupal::configFactory()->getEditable('acquia_connector.settings');
     $changed_action = $this->config('acquia_connector.settings')->get('spi.environment_changed_action');

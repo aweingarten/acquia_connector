@@ -24,7 +24,7 @@ class ConnectorException extends Exception {
    * @param \Exception $previous
    *   The previous exception used for the exception chaining. Since 5.3.0.
    */
-  public function __construct($message, $code = 0, $custom = [], Exception $previous = NULL) {
+  public function __construct($message, $code = 0, array $custom = [], Exception $previous = NULL) {
     parent::__construct($message, $code, $previous);
     $this->custom = $custom;
   }
@@ -73,11 +73,8 @@ class ConnectorException extends Exception {
       case 'code':
         return $this->getCode();
 
-      break;
       case 'message':
         return $this->getMessage();
-
-      break;
     }
     return FALSE;
   }

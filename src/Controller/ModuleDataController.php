@@ -59,7 +59,7 @@ class ModuleDataController extends ControllerBase {
    * @return bool
    *   TRUE if request is valid, FALSE otherwise.
    */
-  public function isValidRequest($data, $message) {
+  public function isValidRequest(array $data, $message) {
     $storage = new Storage();
     $key = $storage->getKey();
     if (!isset($data['authenticator']) || !isset($data['authenticator']['time']) || !isset($data['authenticator']['nonce'])) {

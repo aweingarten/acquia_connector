@@ -72,7 +72,7 @@ class TestStatusController extends ControllerBase {
    *   An associative array containing the validation result of the given tests,
    *   along with any failed parameters.
    */
-  public function testValidate($collection) {
+  public function testValidate(array $collection) {
     $result = TRUE;
     $check_result_value = [];
 

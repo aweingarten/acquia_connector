@@ -31,7 +31,8 @@ hosted search service. Requires Apache Solr Search Integration module.
 Installation
 --------------------------------------------------------------------------------
 
-Consult the online documentation at https://docs.acquia.com/network/install for installation instructions.
+Consult the online documentation at https://docs.acquia.com/network/install for
+installation instructions.
 
 
 Maintainers

@@ -80,7 +80,7 @@ class Client {
    */
   public function getSubscriptionCredentials($email, $password) {
     $body = ['email' => $email];
-    $authenticator = $this->buildAuthenticator($email, ['rpc_version' => ACQUIA_SPI_DATA_VERSION]);
+    $authenticator = $this->buildAuthenticator($email, ['rpc_version' => ACQUIA_CONNECTOR_SPI_DATA_VERSION]);
     $data = [
       'body' => $body,
       'authenticator' => $authenticator,
@@ -95,9 +95,9 @@ class Client {
       $body = [
         'email' => $email,
         'pass' => $pass,
-        'rpc_version' => ACQUIA_SPI_DATA_VERSION,
+        'rpc_version' => ACQUIA_CONNECTOR_SPI_DATA_VERSION,
       ];
-      $authenticator = $this->buildAuthenticator($pass, ['rpc_version' => ACQUIA_SPI_DATA_VERSION]);
+      $authenticator = $this->buildAuthenticator($pass, ['rpc_version' => ACQUIA_CONNECTOR_SPI_DATA_VERSION]);
       $data = [
         'body' => $body,
         'authenticator' => $authenticator,
@@ -261,7 +261,7 @@ class Client {
    *
    * @throws ConnectorException
    */
-  protected function request($method, $path, $data) {
+  protected function request($method, $path, array $data) {
     $uri = $this->server . $path;
     $options = [
       'headers' => $this->headers,
@@ -279,10 +279,7 @@ class Client {
           if ($status_code < 200 || $status_code > 299) {
             throw new ConnectorException($data['message'], $data['code'], $data);
           }
-
           return $data;
-
-        break;
 
         case 'POST':
           $response = $this->client->post($uri, $options);
@@ -293,10 +290,7 @@ class Client {
           if ($status_code < 200 || $status_code > 299) {
             throw new ConnectorException($data['message'], $data['code'], $data);
           }
-
           return $data;
-
-        break;
       }
     }
     catch (RequestException $e) {
@@ -318,7 +312,7 @@ class Client {
    * @return array
    *   Authenticator array.
    */
-  protected function buildAuthenticator($key, $params = []) {
+  protected function buildAuthenticator($key, array $params = []) {
     $authenticator = [];
     if (isset($params['identifier'])) {
       // Put Network ID in authenticator but do not use in hash.
@@ -350,7 +344,7 @@ class Client {
    *
    * @see http://www.ietf.org/rfc/rfc2104.txt
    */
-  protected function hash($key, $time, $nonce, $params = []) {
+  protected function hash($key, $time, $nonce, array $params = []) {
     $string = $time . ':' . $nonce;
     return CryptConnector::acquiaHash($key, $string);
   }
@@ -380,13 +374,13 @@ class Client {
    *
    * @throws ConnectorException
    */
-  public function nspiCall($method, $params, $key = NULL) {
+  public function nspiCall($method, array $params, $key = NULL) {
     if (empty($key)) {
       $storage = new Storage();
       $key = $storage->getKey();
     }
     // Used in HMAC validation.
-    $params['rpc_version'] = ACQUIA_SPI_DATA_VERSION;
+    $params['rpc_version'] = ACQUIA_CONNECTOR_SPI_DATA_VERSION;
     $ip = \Drupal::request()->server->get('SERVER_ADDR', '');
     $host = \Drupal::request()->server->get('HTTP_HOST', '');
     $ssl = \Drupal::request()->isSecure();

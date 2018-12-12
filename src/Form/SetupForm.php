@@ -19,11 +19,7 @@ use Drupal\acquia_connector\ConnectorException;
  */
 class SetupForm extends ConfigFormBase {
 
-  /**
-   * The Acquia client.
-   *
-   * @var \Drupal\acquia_connector\Client
-   */
+  /** @var \Drupal\acquia_connector\Client $client */
   protected $client;
 
   /**

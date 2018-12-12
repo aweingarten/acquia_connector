@@ -204,7 +204,7 @@ class VariablesController extends ControllerBase {
    * @param array $set_variables
    *   Variables to be set.
    */
-  public function setVariables($set_variables) {
+  public function setVariables(array $set_variables) {
     \Drupal::logger('acquia spi')->notice('SPI set variables: @messages', ['@messages' => implode(', ', $set_variables)]);
     if (empty($set_variables)) {
       return;

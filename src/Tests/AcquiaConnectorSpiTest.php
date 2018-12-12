@@ -1,15 +1,8 @@
 <?php
 
-/**
- * @file
- * Definition of Drupal\acquia_connector\Tests\AcquiaConnectorSpiTest.
- */
-
 namespace Drupal\acquia_connector\Tests;
 
 use Drupal\simpletest\WebTestBase;
-use Drupal\acquia_connector\Controller\SpiController;
-use Drupal\acquia_connector\Controller\VariablesController;
 use Drupal\Component\Serialization\Json;
 
 /**
@@ -178,21 +171,21 @@ class AcquiaConnectorSpiTest extends WebTestBase {
   }
 
   /**
-   *
+   * Executes all Acquia connector SPI tests.
    */
   public function testAll() {
-    $this->_testAcquiaSpiUi();
-    $this->_testAcquiaSpiGet();
-    $this->_testNoObjectInSpiData();
-    $this->_testAcquiaSpiSend();
-    $this->_testAcquiaSpiUpdateResponse();
-    $this->_testAcquiaSpiSetVariables();
+    $this->testAcquiaSpiUi();
+    $this->testAcquiaSpiGet();
+    $this->testNoObjectInSpiData();
+    $this->testAcquiaSpiSend();
+    $this->testAcquiaSpiUpdateResponse();
+    $this->testAcquiaSpiSetVariables();
   }
 
   /**
    * Test Acquia SPI UI.
    */
-  public function _testAcquiaSpiUi() {
+  public function testAcquiaSpiUi() {
     $this->drupalGet($this->statusReportUrl);
     $this->assertNoText($this->acquiaSPIStrings('spi-status-text'), 'SPI send option does not exist when site is not connected');
     // Connect site on key and id that will error.
@@ -291,7 +284,7 @@ class AcquiaConnectorSpiTest extends WebTestBase {
   /**
    * Test Acquia SPI get.
    */
-  public function _testAcquiaSpiGet() {
+  public function testAcquiaSpiGet() {
     // Connect site on non-error key and id.
     $this->connectSite();
 
@@ -345,7 +338,7 @@ class AcquiaConnectorSpiTest extends WebTestBase {
   /**
    * Validate Acquia SPI data.
    */
-  public function _testNoObjectInSpiData() {
+  public function testNoObjectInSpiData() {
     // Connect site on non-error key and id.
     $this->connectSite();
 
@@ -365,7 +358,7 @@ class AcquiaConnectorSpiTest extends WebTestBase {
   /**
    * Test Acquia SPI send.
    */
-  public function _testAcquiaSpiSend() {
+  public function testAcquiaSpiSend() {
     // Connect site on invalid credentials.
     $edit_fields = [
       'acquia_identifier' => $this->acqtestErrorId,
@@ -402,7 +395,7 @@ class AcquiaConnectorSpiTest extends WebTestBase {
   /**
    * Test Acquia SPI update response.
    */
-  public function _testAcquiaSpiUpdateResponse() {
+  public function testAcquiaSpiUpdateResponse() {
     $def_timestamp = \Drupal::config('acquia_connector.settings')->get('spi.def_timestamp');
     $this->assertNotEqual($def_timestamp, 0, 'SPI definition timestamp set');
     $def_vars = \Drupal::config('acquia_connector.settings')->get('spi.def_vars');
@@ -419,7 +412,7 @@ class AcquiaConnectorSpiTest extends WebTestBase {
   /**
    * Test Acquia SPI set variables.
    */
-  public function _testAcquiaSpiSetVariables() {
+  public function testAcquiaSpiSetVariables() {
     // Connect site on non-error key and id.
     $this->connectSite();
 
@@ -502,120 +495,6 @@ class AcquiaConnectorSpiTest extends WebTestBase {
     ];
     $submit_button = 'Connect';
     $this->drupalPostForm($this->credentialsPath, $edit_fields, $submit_button);
-  }
-
-}
-
-/**
- * Class spiControllerTest.
- *
- * @package Drupal\acquia_connector\Tests
- */
-class SpiControllerTest extends SpiController {
-  protected $client;
-
-  /**
-   * Construction method.
-   */
-  public function __construct() {
-    $client = \Drupal::service('acquia_connector.client');
-    $this->client = $client;
-  }
-
-  /**
-   * Gather site profile information about this site.
-   *
-   * @param string $method
-   *   Optional identifier for the method initiating request.
-   *   Values could be 'cron' or 'menu callback' or 'drush'.
-   *
-   * @return array
-   *   An associative array keyed by types of information.
-   */
-  public function get($method = '') {
-    return parent::get($method);
-  }
-
-  /**
-   * Put SPI data in local storage.
-   *
-   * @param array $data
-   *   Keyed array of data to store.
-   * @param int $expire
-   *   Expire time or null to use default of 1 day.
-   */
-  public function dataStoreSet($data, $expire = NULL) {
-    parent::dataStoreSet($data, $expire);
-  }
-
-  /**
-   * Get SPI data out of local storage.
-   *
-   * @param array $keys
-   *   Array of keys to extract data for.
-   *
-   * @return array
-   *   Stored data or false if no data is retrievable from storage.
-   */
-  public function dataStoreGet($keys) {
-    return parent::dataStoreGet($keys);
-  }
-
-  /**
-   * Gather full SPI data and send to Acquia Network.
-   *
-   * @param string $method
-   *   Optional identifier for the method initiating request.
-   *   Values could be 'cron' or 'menu callback' or 'drush'.
-   *
-   * @return mixed
-   *   FALSE if data not sent else NSPI result array,
-   */
-  public function sendFullSpi($method = '') {
-    return parent::sendFullSpi($method);
-  }
-
-  /**
-   * Generate the machine name for acquia hosted sites.
-   *
-   * @return string
-   *   The suggested Acquia Hosted machine name.
-   */
-  public function getAcquiaHostedMachineName() {
-    return parent::getAcquiaHostedMachineName();
-  }
-
-  /**
-   * Generate the name for acquia hosted sites.
-   *
-   * @return string
-   *   The suggested Acquia Hosted name.
-   */
-  public function getAcquiaHostedName() {
-    return parent::getAcquiaHostedName();
-  }
-
-}
-
-/**
- * Class VariablesControllerTest.
- *
- * @package Drupal\acquia_connector\Tests
- */
-class VariablesControllerTest extends VariablesController {
-
-  /**
-   * {@inheritdoc}
-   */
-  public function setVariables($set_variables) {
-    parent::setVariables($set_variables);
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function getVariablesData() {
-    return parent::getVariablesData();
   }
 
 }

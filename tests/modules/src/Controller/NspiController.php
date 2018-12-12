@@ -123,27 +123,21 @@ class NspiController extends ControllerBase {
             $result['body']['nspi_messages'][] = t('This is the first connection from this site, it may take awhile for it to appear on the Acquia Network.');
             return new JsonResponse($result);
 
-          break;
-          case 'update':
-            $update = $this->updateNspiSite($spi_data);
-            $result['body']['nspi_messages'][] = $update;
-            break;
-
           case 'unblock':
             \Drupal::state()->delete('acqtest_site_blocked');
             $result['body']['spi_error'] = '';
             $result['body']['nspi_messages'][] = t('Your site has been enabled and is sending data to Acquia Cloud.');
             return new JsonResponse($result);
 
-          break;
           case 'block':
             \Drupal::state()->set('acqtest_site_blocked', TRUE);
             $result['body']['spi_error'] = '';
             $result['body']['nspi_messages'][] = t('You have disabled your site from sending data to Acquia Cloud.');
             return new JsonResponse($result);
-
-          break;
         }
+
+        $update = $this->updateNspiSite($spi_data);
+        $result['body']['nspi_messages'][] = $update;
 
         // Update site name if it has changed.
         $tacqtest_site_name = \Drupal::state()->get('acqtest_site_name');
@@ -272,7 +266,7 @@ class NspiController extends ControllerBase {
    * @return bool
    *   TRUE if machine name was changed.
    */
-  public function checkMachineNameStatusChanged($spi_data) {
+  public function checkMachineNameStatusChanged(array $spi_data) {
     return isset($spi_data['machine_name']) && $spi_data['machine_name'] != $this->acqtestSiteMachineName;
   }
 
@@ -285,7 +279,7 @@ class NspiController extends ControllerBase {
    * @return bool
    *   TRUE if site is Acquia Hosted.
    */
-  public function checkAcquiaHostedStatusChanged($spi_data) {
+  public function checkAcquiaHostedStatusChanged(array $spi_data) {
     return isset($spi_data['acquia_hosted']) && (bool) $spi_data['acquia_hosted'] != (bool) $this->acquiaHosted;
   }
 
@@ -372,7 +366,7 @@ class NspiController extends ControllerBase {
    * @return array
    *   Result array.
    */
-  protected function basicAuthenticator($fields, $data) {
+  protected function basicAuthenticator(array $fields, array $data) {
     $result = [];
     foreach ($fields as $field => $type) {
       if (empty($data['authenticator'][$field]) || !$type($data['authenticator'][$field])) {
@@ -472,7 +466,7 @@ class NspiController extends ControllerBase {
    * @return array
    *   Result array.
    */
-  protected function validateAuthenticator($data) {
+  protected function validateAuthenticator(array $data) {
     $fields = [
       'time' => 'is_numeric',
       'identifier' => 'is_string',
