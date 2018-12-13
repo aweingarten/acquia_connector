@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Extends the Solarium plugin for the acquia search module.
- */
-
 namespace Drupal\acquia_search\EventSubscriber;
 
 use Drupal\acquia_connector\Helper\Storage;
@@ -16,7 +11,6 @@ use Solarium\Core\Plugin\Plugin;
 use Drupal\Component\Utility\Crypt;
 use Solarium\Exception\HttpException;
 use Drupal\acquia_connector\CryptConnector;
-use Drupal\acquia_search\AcquiaSearchV3ApiClient;
 
 /**
  * Extends Solarium plugin: authenticate, etc.
@@ -26,7 +20,7 @@ class SearchSubscriber extends Plugin {
   /**
    * Solarium client.
    *
-   * @var \Solarium\Core\Client\Client;
+   * @var \Solarium\Core\Client\Client
    */
   protected $client;
 
@@ -64,7 +58,7 @@ class SearchSubscriber extends Plugin {
   /**
    * Build Acquia Solr Search Authenticator.
    *
-   * @param preExecuteRequest $event
+   * @param \Solarium\Core\Event\preExecuteRequest $event
    *   PreExecuteRequest event.
    */
   public function preExecuteRequest(preExecuteRequest $event) {
@@ -97,7 +91,7 @@ class SearchSubscriber extends Plugin {
   /**
    * Validate response.
    *
-   * @param postExecuteRequest $event
+   * @param \Solarium\Core\Event\postExecuteRequest $event
    *   postExecuteRequest event.
    */
   public function postExecuteRequest(postExecuteRequest $event) {

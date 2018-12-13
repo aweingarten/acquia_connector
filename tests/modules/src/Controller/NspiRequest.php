@@ -16,7 +16,7 @@ class NspiRequest implements EventSubscriberInterface {
   /**
    * Counts requests to the test NSPI server.
    *
-   * @param GetResponseEvent $event
+   * @param \Symfony\Component\HttpKernel\Event\GetResponseEvent $event
    *   The kernel request event.
    */
   public function onKernelRequest(GetResponseEvent $event) {
@@ -33,7 +33,7 @@ class NspiRequest implements EventSubscriberInterface {
    * {@inheritdoc}
    */
   public static function getSubscribedEvents() {
-    $events[KernelEvents::REQUEST][] = array('onKernelRequest');
+    $events[KernelEvents::REQUEST][] = ['onKernelRequest'];
     return $events;
   }
 

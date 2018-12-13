@@ -12,23 +12,23 @@ use Drupal\acquia_connector\Controller\TestStatusController;
  * Implements hook_drush_command().
  */
 function acquia_connector_drush_command() {
-  $items = array();
-  $items['spi-get'] = array(
+  $items = [];
+  $items['spi-get'] = [
     'description' => dt('Output raw Acquia SPI data.'),
-    'options' => array(
+    'options' => [
       'outfile' => dt('Optional. A file to write data to in the current directory. If omitted Drush will output to stdout.'),
       'format' => dt('Optional. Format may be json, print_r, or var_dump. Defaults to print_r.'),
-    ),
-    'examples' => array(
+    ],
+    'examples' => [
       'spi-get --format=json --outfile=spi.json' => 'Write JSON encoded SPI data to spi.json in current directory.',
-    ),
-    'drupal dependencies' => array('acquia_connector'),
-  );
-  $items['spi-test-validate'] = array(
+    ],
+    'drupal dependencies' => ['acquia_connector'],
+  ];
+  $items['spi-test-validate'] = [
     'callback'    => 'drush_acquia_connector_custom_test_validate',
     'description' => dt('Perform a validation check on any modules with Acquia SPI custom tests.'),
-    'aliases'     => array('spi-tv'),
-  );
+    'aliases'     => ['spi-tv'],
+  ];
   return $items;
 }
 
@@ -38,7 +38,7 @@ function acquia_connector_drush_command() {
 function acquia_connector_drush_help($section) {
   switch ($section) {
     case 'drush:spi-get':
-      return dt("Output raw Acquia SPI data. NOTE: If the Acquia Connector module is not enabled or installed, execute with: drush -i @spidir", array('@spidir' => dirname(__FILE__)));
+      return dt("Output raw Acquia SPI data. NOTE: If the Acquia Connector module is not enabled or installed, execute with: drush -i @spidir", ['@spidir' => dirname(__FILE__)]);
   }
 }
 
@@ -67,7 +67,7 @@ function drush_acquia_connector_spi_get() {
     $wd = getcwd();
     chdir($_SERVER['PWD']);
     if (file_put_contents($file, $spi)) {
-      drush_log(dt('SPI Data written to @outfile.', array('@outfile' => realpath($file))), 'success');
+      drush_log(dt('SPI Data written to @outfile.', ['@outfile' => realpath($file)]), 'success');
     }
     chdir($wd);
   }
@@ -105,15 +105,15 @@ function _acquia_connector_drush_get() {
  * A command callback and drush wrapper for custom test validation.
  */
 function drush_acquia_connector_custom_test_validate() {
-  $pass = array();
-  $failure = array();
+  $pass = [];
+  $failure = [];
 
   $modules = \Drupal::moduleHandler()->getImplementations('acquia_connector_spi_test');
   if (!$modules) {
     drush_print_r((string) dt("No Acquia SPI custom tests were detected."));
     return;
   }
-  drush_print_r((string) dt("Acquia SPI custom tests were detected in: @modules \n", array('@modules' => implode(', ', $modules))));
+  drush_print_r((string) dt("Acquia SPI custom tests were detected in: @modules \n", ['@modules' => implode(', ', $modules)]));
 
   foreach ($modules as $module) {
     $function = $module . '_acquia_connector_spi_test';
@@ -123,17 +123,17 @@ function drush_acquia_connector_custom_test_validate() {
 
       if (!$result['result']) {
         $failure[] = $module;
-        drush_print_r((string) dt("[FAILED]  Validation failed for '@module' and has been logged.", array('@module' => $module)));
+        drush_print_r((string) dt("[FAILED]  Validation failed for '@module' and has been logged.", ['@module' => $module]));
 
         foreach ($result['failure'] as $test_name => $test_failures) {
           foreach ($test_failures as $test_param => $test_value) {
-            $variables = array(
+            $variables = [
               '@module_name' => $module,
               '@message'     => $test_value['message'],
               '@param_name'  => $test_param,
               '@test_name'   => $test_name,
               '@value'       => $test_value['value'],
-            );
+            ];
             drush_print_r((string) dt("[DETAILS] @message for parameter '@param_name'; current value '@value'. (Test @test_name in module @module_name)", $variables));
             watchdog('acquia connector spi test', "<em>Custom test validation failed</em>: @message for parameter '@param_name'; current value '@value'. (<em>Test '@test_name' in module '@module_name'</em>)", $variables);
           }
@@ -141,14 +141,14 @@ function drush_acquia_connector_custom_test_validate() {
       }
       else {
         $pass[] = $module;
-        drush_print_r((string) dt("[PASSED]  Validation passed for '@module.'", array('@module' => $module)));
+        drush_print_r((string) dt("[PASSED]  Validation passed for '@module.'", ['@module' => $module]));
       }
     }
     drush_print_r("");
   }
 
   $message = (string) dt('Validation checks completed.');
-  $variables = array();
+  $variables = [];
   if (count($pass) > 0) {
     $message .= "\n";
     $variables['@passes'] = implode(', ', $pass);

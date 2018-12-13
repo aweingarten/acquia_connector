@@ -22,7 +22,7 @@ function acquia_connector_uninstall() {
  * Implements hook_requirements().
  */
 function acquia_connector_requirements($phase) {
-  $requirements = array();
+  $requirements = [];
 
   switch ($phase) {
     case 'runtime':
@@ -89,24 +89,24 @@ function acquia_connector_requirements($phase) {
           $value = (string) t('SPI data has not been sent');
         }
         else {
-          $value = (string) t('Last sent @time ago', array('@time' => \Drupal::service('date.formatter')->formatInterval($ago)));
+          $value = (string) t('Last sent @time ago', ['@time' => \Drupal::service('date.formatter')->formatInterval($ago)]);
         }
-        $requirements['acquia_spi'] = array(
+        $requirements['acquia_spi'] = [
           'title' => t('Acquia Subscription SPI'),
           'severity' => $severity,
           'value' => $value,
-          'description' => t($description, array(
+          'description' => t($description, [
             '@interval' => $interval,
             ':config-page' => $config_url,
-            ':spi-send' => Url::fromRoute('acquia_connector.send', array(), array(
-              'query' => array(
+            ':spi-send' => Url::fromRoute('acquia_connector.send', [], [
+              'query' => [
                 'destination' => 'admin/reports/status',
                 'key' => $key,
-              ),
+              ],
               'absolute' => TRUE,
-            ))->toString(),
-          )),
-        );
+            ])->toString(),
+          ]),
+        ];
       }
 
       // Inform users on subscription status. Either we know they are active,
@@ -114,42 +114,42 @@ function acquia_connector_requirements($phase) {
       // we have credentials but an inactive subscription (either bad
       // credentials or expired subscription).
       if ($subscription->isActive()) {
-        $requirements['acquia_subscription_status'] = array(
+        $requirements['acquia_subscription_status'] = [
           'title' => t('Acquia Subscription status'),
           'severity' => REQUIREMENT_OK,
           'value' => t('Active'),
-          'description' => t('You can <a href=":refresh-status">manually refresh the subscription status</a>.', array(
-            ':refresh-status' => Url::fromRoute('acquia_connector.refresh_status', array(), array('absolute' => TRUE))
+          'description' => t('You can <a href=":refresh-status">manually refresh the subscription status</a>.', [
+            ':refresh-status' => Url::fromRoute('acquia_connector.refresh_status', [], ['absolute' => TRUE])
               ->toString(),
-          )),
-        );
+          ]),
+        ];
       }
       elseif (!$has_credentials) {
-        $requirements['acquia_subscription_status'] = array(
+        $requirements['acquia_subscription_status'] = [
           'title' => t('Acquia Subscription status'),
           'severity' => REQUIREMENT_WARNING,
           'value' => t('Unknown'),
           'description' => t('You did not complete your signup to the Acquia Subscription. You can provide the subscription identifier and the subscription key at the <a href=":settings">Acquia settings</a> page or try to <a href=":refresh-status">manually refresh the subscription status</a>.', [':settings' => Url::fromRoute('acquia_connector.settings')->toString(), ':refresh-status' => Url::fromRoute('acquia_connector.refresh_status')->toString()]),
-        );
+        ];
       }
       else {
         $subscription = $config->get('subscription_data');
         $href = isset($subscription['uuid']) ? 'https://cloud.acquia.com/app/develop/applications/' . $subscription['uuid'] : 'https://cloud.acquia.com';
-        $requirements['acquia_subscription_status'] = array(
+        $requirements['acquia_subscription_status'] = [
           'title' => t('Acquia Subscription status'),
           'severity' => REQUIREMENT_WARNING,
           'value' => t('Inactive'),
           'description' => t('Your subscription is expired or you are using an invalid identifier and key pair. You can check the subscription identifier and the subscription key at the <a href=":settings">Acquia settings</a> page. Check <a href=":acquia-network">your subscription on the Acquia Subscription</a> for further status information.', [':settings' => Url::fromRoute('acquia_connector.settings')->toString(), ':acquia-network' => $href]),
-        );
+        ];
       }
 
       // Acquia SPI custom tests status.
-      $variables = array(
+      $variables = [
         ':help' => Url::fromUri('base:admin/help/acquia_connector', ['absolute' => TRUE])
           ->toString(),
         ':validate' => Url::fromRoute('acquia_connector.test_validate', [], ['absolute' => TRUE])
           ->toString(),
-      );
+      ];
 
       $modules = \Drupal::moduleHandler()->getImplementations('acquia_connector_spi_test');
       if (empty($modules)) {
@@ -161,7 +161,7 @@ function acquia_connector_requirements($phase) {
         $status = new TestStatusController();
         $result = $status->testStatus();
         if (!empty($result)) {
-          $modules = implode(', ', array_keys($result));
+          $modules     = implode(', ', array_keys($result));
           $description = (string) t('Custom tests within the following module(s) have failed validation and will not be sent: %modules. <br/>Please check the error logs for more information regarding how to pass validation or <a href=":validate">perform another validation check</a>. A validation check can also be performed via the Drush command, "spi-test-validate".');
           $value       = (string) t('Failed (<a href=":help">more information</a>)');
           $severity    = REQUIREMENT_ERROR;
@@ -175,12 +175,12 @@ function acquia_connector_requirements($phase) {
 
         $variables['%modules'] = $modules;
       }
-      $requirements['acquia_spi_test'] = array(
+      $requirements['acquia_spi_test'] = [
         'title'       => t('Acquia Subscription SPI Custom Tests'),
         'description' => t($description, $variables),
         'value'       => t($value, $variables),
         'severity'    => $severity,
-      );
+      ];
       break;
   }
 
@@ -217,7 +217,7 @@ function acquia_connector_update_8003() {
 
   $variables_automatic = $config->get('spi.set_variables_automatic');
 
-  foreach(['cache_lifetime', 'cache'] as $variable) {
+  foreach (['cache_lifetime', 'cache'] as $variable) {
     if (($key = array_search($variable, $variables_automatic)) !== FALSE) {
       unset($variables_automatic[$key]);
     }
@@ -260,4 +260,3 @@ function acquia_connector_update_8005() {
 
   $config->save(TRUE);
 }
-

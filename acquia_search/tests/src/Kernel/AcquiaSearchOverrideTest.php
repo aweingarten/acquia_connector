@@ -1,12 +1,8 @@
 <?php
 
-/**
- * @file
- * Contains Drupal\Tests\acquia_search\Unit\AcquiaSearchTest.
- */
-
 namespace Drupal\Tests\acquia_search\Kernel;
 
+use Drupal\Core\Database\Database;
 use Drupal\acquia_connector\Helper\Storage;
 use Drupal\acquia_search\Plugin\SolrConnector\SearchApiSolrAcquiaConnector;
 use Drupal\KernelTests\KernelTestBase;
@@ -31,7 +27,7 @@ class AcquiaSearchOverrideTest extends KernelTestBase {
 
     parent::setUp();
 
-    $this->installConfig(array('acquia_connector'));
+    $this->installConfig(['acquia_connector']);
 
     $guzzle = $this->getMock('GuzzleHttp\Client');
     $guzzle->expects($this->any())
@@ -54,7 +50,7 @@ class AcquiaSearchOverrideTest extends KernelTestBase {
 
     $this->_setAvailableSearchCores();
 
-    $solr_connector = new SearchApiSolrAcquiaConnector(array(), 'foo', array('foo'));
+    $solr_connector = new SearchApiSolrAcquiaConnector([], 'foo', ['foo']);
     $config = $solr_connector->defaultConfiguration();
 
     $this->assertEquals(ACQUIA_SEARCH_AUTO_OVERRIDE_READ_ONLY, $config['overridden_by_acquia_search']);
@@ -75,7 +71,7 @@ class AcquiaSearchOverrideTest extends KernelTestBase {
 
     $this->_setAvailableSearchCores();
 
-    $solr_connector = new SearchApiSolrAcquiaConnector(array(), 'foo', array('foo'));
+    $solr_connector = new SearchApiSolrAcquiaConnector([], 'foo', ['foo']);
     $config = $solr_connector->defaultConfiguration();
 
     $db_name = $this->_getDbName();
@@ -99,7 +95,7 @@ class AcquiaSearchOverrideTest extends KernelTestBase {
 
     $this->_setAvailableSearchCores();
 
-    $solr_connector = new SearchApiSolrAcquiaConnector(array(), 'foo', array('foo'));
+    $solr_connector = new SearchApiSolrAcquiaConnector([], 'foo', ['foo']);
     $config = $solr_connector->defaultConfiguration();
 
     $db_name = $this->_getDbName();
@@ -124,7 +120,7 @@ class AcquiaSearchOverrideTest extends KernelTestBase {
 
     $this->_setAvailableSearchCores();
 
-    $solr_connector = new SearchApiSolrAcquiaConnector(array(), 'foo', array('foo'));
+    $solr_connector = new SearchApiSolrAcquiaConnector([], 'foo', ['foo']);
     $config = $solr_connector->defaultConfiguration();
 
     $this->assertEquals(ACQUIA_SEARCH_AUTO_OVERRIDE_READ_ONLY, $config['overridden_by_acquia_search']);
@@ -145,7 +141,7 @@ class AcquiaSearchOverrideTest extends KernelTestBase {
 
     $this->_setAvailableSearchCores();
 
-    $solr_connector = new SearchApiSolrAcquiaConnector(array(), 'foo', array('foo'));
+    $solr_connector = new SearchApiSolrAcquiaConnector([], 'foo', ['foo']);
     $config = $solr_connector->defaultConfiguration();
 
     $this->assertEquals(ACQUIA_SEARCH_AUTO_OVERRIDE_READ_ONLY, $config['overridden_by_acquia_search']);
@@ -168,7 +164,7 @@ class AcquiaSearchOverrideTest extends KernelTestBase {
 
     $this->_setAvailableSearchCores();
 
-    $solr_connector = new SearchApiSolrAcquiaConnector(array(), 'foo', array('foo'));
+    $solr_connector = new SearchApiSolrAcquiaConnector([], 'foo', ['foo']);
     $config = $solr_connector->defaultConfiguration();
 
     $this->assertEquals(ACQUIA_SEARCH_OVERRIDE_AUTO_SET, $config['overridden_by_acquia_search']);
@@ -187,14 +183,13 @@ class AcquiaSearchOverrideTest extends KernelTestBase {
     // When the core ID with the DB name in it is not available, it should
     // override the URL value with the core ID that has the site folder name
     // in it.
-
     $_ENV['AH_SITE_ENVIRONMENT'] = 'dev';
     $_ENV['AH_SITE_NAME'] = 'testsite1dev';
     $_ENV['AH_SITE_GROUP'] = 'testsite1';
 
     $this->_setAvailableSearchCores(TRUE);
 
-    $solr_connector = new SearchApiSolrAcquiaConnector(array(), 'foo', array('foo'));
+    $solr_connector = new SearchApiSolrAcquiaConnector([], 'foo', ['foo']);
     $config = $solr_connector->defaultConfiguration();
 
     $site_folder = $this->_getSiteFolderName();
@@ -213,9 +208,11 @@ class AcquiaSearchOverrideTest extends KernelTestBase {
    */
   protected function _assertGetUpdateQueryException($solr_connector) {
 
-    // Set the expectation for exception
-    $this->setExpectedException('Exception',
-      'The Search API Server serving this index is currently in read-only mode.');
+    // Set the expectation for exception.
+    $this->setExpectedException(
+        'Exception',
+        'The Search API Server serving this index is currently in read-only mode.'
+    );
 
     // Run the code that should throw the exception.
     // If exception occurred - test passes. If no exception occurred - test fails.
@@ -253,49 +250,51 @@ class AcquiaSearchOverrideTest extends KernelTestBase {
     $site_folder = $this->_getSiteFolderName();
     $ah_db_name = $this->_getDbName();
 
-    $core_with_folder_name = array(
+    $core_with_folder_name = [
       'balancer' => $solr_hostname,
-      'core_id' => "{$acquia_identifier}.dev.{$site_folder}"
-    );
+      'core_id' => "{$acquia_identifier}.dev.{$site_folder}",
+    ];
 
-    $core_with_db_name = array(
+    $core_with_db_name = [
       'balancer' => $solr_hostname,
-      'core_id' => "{$acquia_identifier}.dev.{$ah_db_name}"
-    );
+      'core_id' => "{$acquia_identifier}.dev.{$ah_db_name}",
+    ];
 
-    $core_with_acquia_identifier = array(
+    $core_with_acquia_identifier = [
       'balancer' => $solr_hostname,
-      'core_id' => "{$acquia_identifier}"
-    );
+      'core_id' => "{$acquia_identifier}",
+    ];
 
-    $search_v3_core = array(
+    $search_v3_core = [
       'balancer' => 'sr-dev.acquia.com',
       'core_id' => "{$acquia_identifier}.dev.{$ah_db_name}",
-      'version' => "v3"
-    );
+      'version' => "v3",
+    ];
 
     if ($no_db_flag) {
-      $available_cores = array(
+      $available_cores = [
         $core_with_folder_name,
         $core_with_acquia_identifier,
-      );
+      ];
     }
     else {
-      $available_cores = array(
+      $available_cores = [
         $core_with_folder_name,
         $core_with_db_name,
         $core_with_acquia_identifier,
         $search_v3_core,
-      );
+      ];
     }
 
     $storage = new Storage();
     $storage->setIdentifier($acquia_identifier);
 
     \Drupal::configFactory()->getEditable('acquia_connector.settings')
-      ->set('subscription_data', array(
-        'heartbeat_data' => array('search_cores' => $available_cores)
-      ))
+      ->set(
+        'subscription_data', [
+          'heartbeat_data' => ['search_cores' => $available_cores],
+        ]
+    )
       ->save();
 
   }
@@ -312,7 +311,7 @@ class AcquiaSearchOverrideTest extends KernelTestBase {
    * Returns the current DB name.
    */
   public function _getDbName() {
-    $db_conn_options = \Drupal\Core\Database\Database::getConnection()->getConnectionOptions();
+    $db_conn_options = Database::getConnection()->getConnectionOptions();
     return $db_conn_options['database'];
   }
 

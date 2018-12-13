@@ -204,25 +204,27 @@ class VariablesController extends ControllerBase {
    * @param array $set_variables
    *   Variables to be set.
    */
-  public function setVariables($set_variables) {
-    \Drupal::logger('acquia spi')->notice('SPI set variables: @messages', array('@messages' => implode(', ', $set_variables)));
+  public function setVariables(array $set_variables) {
+    \Drupal::logger('acquia spi')->notice('SPI set variables: @messages', ['@messages' => implode(', ', $set_variables)]);
     if (empty($set_variables)) {
       return;
     }
-    $saved = array();
+    $saved = [];
     $ignored = \Drupal::config('acquia_connector.settings')->get('spi.ignored_set_variables');
 
     if (!\Drupal::config('acquia_connector.settings')->get('spi.set_variables_override')) {
       $ignored[] = 'acquia_spi_set_variables_automatic';
     }
     // Some variables can never be set.
-    $ignored = array_merge($ignored, array(
-      'drupal_private_key',
-      'site_mail',
-      'site_name',
-      'maintenance_mode',
-      'user_register',
-    ));
+    $ignored = array_merge(
+        $ignored, [
+          'drupal_private_key',
+          'site_mail',
+          'site_name',
+          'maintenance_mode',
+          'user_register',
+        ]
+    );
     // Variables that can be automatically set.
     $whitelist = \Drupal::config('acquia_connector.settings')->get('spi.set_variables_automatic');
     foreach ($set_variables as $key => $value) {
@@ -261,9 +263,9 @@ class VariablesController extends ControllerBase {
       }
     }
     if (!empty($saved)) {
-      \Drupal::configFactory()->getEditable('acquia_connector.settings')->set('spi.saved_variables', array('variables' => $saved, 'time' => time()));
+      \Drupal::configFactory()->getEditable('acquia_connector.settings')->set('spi.saved_variables', ['variables' => $saved, 'time' => time()]);
       \Drupal::configFactory()->getEditable('acquia_connector.settings')->save();
-      \Drupal::logger('acquia spi')->notice('Saved variables from the Acquia Network: @variables', array('@variables' => implode(', ', $saved)));
+      \Drupal::logger('acquia spi')->notice('Saved variables from the Acquia Network: @variables', ['@variables' => implode(', ', $saved)]);
     }
     else {
       \Drupal::logger('acquia spi')->notice('Did not save any variables from the Acquia Network.');

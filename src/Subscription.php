@@ -43,7 +43,7 @@ class Subscription {
    * @return mixed
    *   FALSE, integer (error number), or subscription data.
    */
-  public function update($params = array()) {
+  public function update(array $params = []) {
     $config = \Drupal::configFactory()->getEditable('acquia_connector.settings');
     $current_subscription = $config->get('subscription_data');
     $subscription = FALSE;

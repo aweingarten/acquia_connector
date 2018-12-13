@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains Drupal\acquia_search\PreferredSearchCoreService.
- */
-
 namespace Drupal\acquia_search;
 
 /**
@@ -27,12 +22,12 @@ class PreferredSearchCoreService {
    *   E.g. 'my_site_db'.
    * @param array $available_cores
    *   E.g.
-   *     [
-   *       [
-   *         'balancer' => 'useast11-c4.acquia-search.com',
-   *         'core_id' => 'WXYZ-12345.dev.mysitedev',
-   *       ],
-   *     ].
+   *    [
+   *      [
+   *        'balancer' => 'useast11-c4.acquia-search.com',
+   *        'core_id' => 'WXYZ-12345.dev.mysitedev',
+   *      ],
+   *    ].
    */
   public function __construct($acquia_identifier, $ah_env, $sites_foldername, $ah_db_name, $available_cores) {
 
@@ -70,7 +65,6 @@ class PreferredSearchCoreService {
 
     return $core['balancer'];
   }
-
 
   /**
    * Determines whether the expected core ID matches any available core IDs.
@@ -132,13 +126,17 @@ class PreferredSearchCoreService {
    */
   protected function sortCores($cores) {
 
-    $v3_cores = array_filter($cores, function($core) {
-      return $this->isCoreV3($core);
-    });
+    $v3_cores = array_filter(
+        $cores, function ($core) {
+            return $this->isCoreV3($core);
+        }
+    );
 
-    $regular_cores = array_filter($cores, function($core) {
-      return !$this->isCoreV3($core);
-    });
+    $regular_cores = array_filter(
+        $cores, function ($core) {
+            return !$this->isCoreV3($core);
+        }
+    );
 
     return array_merge($v3_cores, $regular_cores);
   }
@@ -184,7 +182,7 @@ class PreferredSearchCoreService {
    */
   public function getListOfPossibleCores() {
 
-    $possible_core_ids = array();
+    $possible_core_ids = [];
 
     // In index naming, we only accept alphanumeric chars.
     $sites_foldername = preg_replace('@[^a-zA-Z0-9]+@', '', $this->sites_foldername);

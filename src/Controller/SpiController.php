@@ -37,7 +37,7 @@ class SpiController extends ControllerBase {
   /**
    * Constructs a \Drupal\system\ConfigFormBase object.
    *
-   * @param Client $client
+   * @param \Drupal\acquia_connector\Client $client
    *   Acquia Client.
    */
   public function __construct(Client $client) {
@@ -49,7 +49,7 @@ class SpiController extends ControllerBase {
    */
   public static function create(ContainerInterface $container) {
     return new static(
-      $container->get('acquia_connector.client')
+    $container->get('acquia_connector.client')
     );
   }
 
@@ -69,7 +69,7 @@ class SpiController extends ControllerBase {
     // Get the Drupal version.
     $drupal_version = $this->getVersionInfo();
 
-    $stored = $this->dataStoreGet(array('platform'));
+    $stored = $this->dataStoreGet(['platform']);
     if (!empty($stored['platform'])) {
       $platform = $stored['platform'];
     }
@@ -102,11 +102,11 @@ class SpiController extends ControllerBase {
 
     $config->save();
 
-    $spi = array(
+    $spi = [
     // Used in HMAC validation.
-      'rpc_version'        => ACQUIA_SPI_DATA_VERSION,
+      'rpc_version'        => ACQUIA_CONNECTOR_SPI_DATA_VERSION,
     // Used in Fix it now feature.
-      'spi_data_version'   => ACQUIA_SPI_DATA_VERSION,
+      'spi_data_version'   => ACQUIA_CONNECTOR_SPI_DATA_VERSION,
       'site_key'           => sha1(\Drupal::service('private_key')->get()),
       'site_uuid'          => $this->config('acquia_connector.settings')->get('spi.site_uuid'),
       'env_changed_action' => $this->config('acquia_connector.settings')->get('spi.environment_changed_action'),
@@ -118,12 +118,12 @@ class SpiController extends ControllerBase {
       'platform'           => $platform,
       'quantum'            => $this->getQuantum(),
       'system_status'      => $this->getSystemStatus(),
-      'failed_logins'      => $this->config('acquia_connector.settings')->get('spi.send_watchdog') ? $this->getFailedLogins() : array(),
-      '404s'               => $this->config('acquia_connector.settings')->get('spi.send_watchdog') ? $this->get404s() : array(),
+      'failed_logins'      => $this->config('acquia_connector.settings')->get('spi.send_watchdog') ? $this->getFailedLogins() : [],
+      '404s'               => $this->config('acquia_connector.settings')->get('spi.send_watchdog') ? $this->get404s() : [],
       'watchdog_size'      => $this->getWatchdogSize(),
-      'watchdog_data'      => $this->config('acquia_connector.settings')->get('spi.send_watchdog') ? $this->getWatchdogData() : array(),
-      'last_nodes'         => $this->config('acquia_connector.settings')->get('spi.send_node_user') ? $this->getLastNodes() : array(),
-      'last_users'         => $this->config('acquia_connector.settings')->get('spi.send_node_user') ? $this->getLastUsers() : array(),
+      'watchdog_data'      => $this->config('acquia_connector.settings')->get('spi.send_watchdog') ? $this->getWatchdogData() : [],
+      'last_nodes'         => $this->config('acquia_connector.settings')->get('spi.send_node_user') ? $this->getLastNodes() : [],
+      'last_users'         => $this->config('acquia_connector.settings')->get('spi.send_node_user') ? $this->getLastUsers() : [],
       'extra_files'        => $this->checkFilesPresent(),
       'ssl_login'          => $this->checkLogin(),
       'distribution'       => isset($drupal_version['distribution']) ? $drupal_version['distribution'] : '',
@@ -131,7 +131,7 @@ class SpiController extends ControllerBase {
       'build_data'         => $drupal_version,
       'roles'              => Json::encode(user_roles()),
       'uid_0_present'      => $this->getUidZerroIsPresent(),
-    );
+    ];
 
     $scheme = parse_url($this->config('acquia_connector.settings')->get('spi.server'), PHP_URL_SCHEME);
     $via_ssl = (in_array('ssl', stream_get_transports(), TRUE) && $scheme == 'https') ? TRUE : FALSE;
@@ -139,7 +139,7 @@ class SpiController extends ControllerBase {
       $via_ssl = TRUE;
     }
 
-    $additional_data = array();
+    $additional_data = [];
 
     $security_review = new SecurityReviewController();
     $security_review_results = $security_review->runSecurityReview();
@@ -190,12 +190,12 @@ class SpiController extends ControllerBase {
     else {
       $variablesController = new VariablesController();
       // Values returned only over SSL.
-      $spi_ssl = array(
+      $spi_ssl = [
         'system_vars' => $variablesController->getVariablesData(),
         'settings_ra' => $this->getSettingsPermissions(),
         'admin_count' => $this->config('acquia_connector.settings')->get('spi.admin_priv') ? $this->getAdminCount() : '',
         'admin_name' => $this->config('acquia_connector.settings')->get('spi.admin_priv') ? $this->getSuperName() : '',
-      );
+      ];
 
       return array_merge($spi, $spi_ssl);
     }
@@ -204,19 +204,19 @@ class SpiController extends ControllerBase {
   /**
    * Collects all user-contributed test results that pass validation.
    *
-   * @return array $custom_data
+   * @return array
    *   An associative array containing properly formatted user-contributed
    *   tests.
    */
   private function testCollect() {
-    $custom_data = array();
+    $custom_data = [];
 
     // Collect all custom data provided by hook_insight_custom_data().
     $collections = \Drupal::moduleHandler()->invokeAll('acquia_connector_spi_test');
 
     foreach ($collections as $test_name => $test_params) {
       $status = new TestStatusController();
-      $result = $status->testValidate(array($test_name => $test_params));
+      $result = $status->testValidate([$test_name => $test_params]);
 
       if ($result['result']) {
         $custom_data[$test_name] = $test_params;
@@ -242,13 +242,13 @@ class SpiController extends ControllerBase {
       }
       else {
         // All the required forms should be enabled.
-        $required_forms = array(
+        $required_forms = [
           'form_user_login_form',
           'form_user_form',
           'form_user_register_form',
           'form_user_pass_reset',
           'form_user_pass',
-        );
+        ];
         $forms_safe = TRUE;
         foreach ($required_forms as $form_variable) {
           if (!$secureLoginConfig[$form_variable]) {
@@ -276,9 +276,9 @@ class SpiController extends ControllerBase {
   private function checkFilesPresent() {
     $server = \Drupal::request()->server->all();
     $files_exist = FALSE;
-    $files_to_remove = array('CHANGELOG.txt', 'COPYRIGHT.txt', 'INSTALL.mysql.txt', 'INSTALL.pgsql.txt', 'INSTALL.txt', 'LICENSE.txt',
+    $files_to_remove = ['CHANGELOG.txt', 'COPYRIGHT.txt', 'INSTALL.mysql.txt', 'INSTALL.pgsql.txt', 'INSTALL.txt', 'LICENSE.txt',
       'MAINTAINERS.txt', 'README.txt', 'UPGRADE.txt', 'PRESSFLOW.txt', 'install.php',
-    );
+    ];
 
     foreach ($files_to_remove as $file) {
       $path = $server['DOCUMENT_ROOT'] . base_path() . $file;
@@ -353,9 +353,9 @@ class SpiController extends ControllerBase {
    *   The details of last 15 users created.
    */
   private function getLastUsers() {
-    $last_five_users = array();
+    $last_five_users = [];
     $result = db_select('users_field_data', 'u')
-      ->fields('u', array('uid', 'name', 'mail', 'created'))
+      ->fields('u', ['uid', 'name', 'mail', 'created'])
       ->condition('u.created', REQUEST_TIME - 3600, '>')
       ->orderBy('created', 'DESC')
       ->range(0, 15)
@@ -382,10 +382,10 @@ class SpiController extends ControllerBase {
    *   Array of the details of last 15 nodes created.
    */
   private function getLastNodes() {
-    $last_five_nodes = array();
+    $last_five_nodes = [];
     if (\Drupal::moduleHandler()->moduleExists('node')) {
       $result = db_select('node_field_data', 'n')
-        ->fields('n', array('title', 'type', 'nid', 'created', 'langcode'))
+        ->fields('n', ['title', 'type', 'nid', 'created', 'langcode'])
         ->condition('n.created', REQUEST_TIME - 3600, '>')
         ->orderBy('n.created', 'DESC')
         ->range(0, 15)
@@ -414,11 +414,11 @@ class SpiController extends ControllerBase {
    *   EMERGENCY and CRITICAL watchdog records for last hour.
    */
   private function getWatchdogData() {
-    $wd = array();
+    $wd = [];
     if (\Drupal::moduleHandler()->moduleExists('dblog')) {
       $result = db_select('watchdog', 'w')
-        ->fields('w', array('wid', 'severity', 'type', 'message', 'timestamp'))
-        ->condition('w.severity', array(RfcLogLevel::EMERGENCY, RfcLogLevel::CRITICAL), 'IN')
+        ->fields('w', ['wid', 'severity', 'type', 'message', 'timestamp'])
+        ->condition('w.severity', [RfcLogLevel::EMERGENCY, RfcLogLevel::CRITICAL], 'IN')
         ->condition('w.timestamp', REQUEST_TIME - 3600, '>')
         ->execute();
 
@@ -438,7 +438,7 @@ class SpiController extends ControllerBase {
    */
   private function getWatchdogSize() {
     if (\Drupal::moduleHandler()->moduleExists('dblog')) {
-      return db_select('watchdog', 'w')->fields('w', array('wid'))->countQuery()->execute()->fetchField();
+      return db_select('watchdog', 'w')->fields('w', ['wid'])->countQuery()->execute()->fetchField();
     }
   }
 
@@ -452,15 +452,16 @@ class SpiController extends ControllerBase {
    *   An array of the pages not found and some associated data.
    */
   private function get404s() {
-    $data = array();
+    $data = [];
     $row = 0;
 
     if (\Drupal::moduleHandler()->moduleExists('dblog')) {
       $result = db_select('watchdog', 'w')
-        ->fields('w', array('message', 'hostname', 'referer', 'timestamp'))
+        ->fields('w', ['message', 'hostname', 'referer', 'timestamp'])
         ->condition('w.type', 'page not found', '=')
         ->condition('w.timestamp', REQUEST_TIME - 3600, '>')
-        ->condition('w.message', array(
+        ->condition(
+        'w.message', [
           "UPGRADE.txt",
           "MAINTAINERS.txt",
           "README.txt",
@@ -470,7 +471,8 @@ class SpiController extends ControllerBase {
           "INSTALL.mysql.txt",
           "COPYRIGHT.txt",
           "CHANGELOG.txt",
-        ), 'NOT IN')
+        ], 'NOT IN'
+      )
         ->orderBy('w.timestamp', 'DESC')
         ->range(0, 10)
         ->execute();
@@ -494,15 +496,16 @@ class SpiController extends ControllerBase {
    *   Array of last 10 failed logins.
    */
   private function getFailedLogins() {
-    $last_logins = array();
+    $last_logins = [];
     $cron_interval = $this->config('acquia_connector.settings')->get('spi.cron_interval');
 
     if (\Drupal::moduleHandler()->moduleExists('dblog')) {
       $result = db_select('watchdog', 'w')
-        ->fields('w', array('message', 'variables', 'timestamp'))
+        ->fields('w', ['message', 'variables', 'timestamp'])
         ->condition('w.message', 'login attempt failed%', 'LIKE')
         ->condition('w.timestamp', REQUEST_TIME - $cron_interval, '>')
-        ->condition('w.message', array(
+        ->condition(
+        'w.message', [
           "UPGRADE.txt",
           "MAINTAINERS.txt",
           "README.txt",
@@ -512,7 +515,8 @@ class SpiController extends ControllerBase {
           "INSTALL.mysql.txt",
           "COPYRIGHT.txt",
           "CHANGELOG.txt",
-        ), 'NOT IN')
+        ], 'NOT IN'
+      )
         ->orderBy('w.timestamp', 'DESC')
         ->range(0, 10)
         ->execute();
@@ -534,20 +538,20 @@ class SpiController extends ControllerBase {
    *   System status array.
    */
   private function getSystemStatus() {
-    $data = array();
+    $data = [];
 
     $profile = drupal_get_profile();
     if ($profile != 'standard') {
       $info = system_get_info('module', $profile);
-      $data['install_profile'] = array(
+      $data['install_profile'] = [
         'title' => 'Install profile',
         'value' => sprintf('%s (%s-%s)', $info['name'], $profile, $info['version']),
-      );
+      ];
     }
-    $data['php'] = array(
+    $data['php'] = [
       'title' => 'PHP',
       'value' => phpversion(),
-    );
+    ];
     $conf_dir = TRUE;
     $settings = TRUE;
     $dir = DrupalKernel::findSitePath(\Drupal::request(), TRUE);
@@ -563,43 +567,43 @@ class SpiController extends ControllerBase {
     else {
       $value = 'Protected';
     }
-    $data['settings.php'] = array(
+    $data['settings.php'] = [
       'title' => 'Configuration file',
       'value' => $value,
       'conf_dir' => $conf_dir,
       'settings' => $settings,
-    );
+    ];
     $cron_last = \Drupal::state()->get('system.cron_last');
     if (!is_numeric($cron_last)) {
       $cron_last = \Drupal::state()->get('install_time', 0);
     }
-    $data['cron'] = array(
+    $data['cron'] = [
       'title' => 'Cron maintenance tasks',
       'value' => sprintf('Last run %s ago', \Drupal::service('date.formatter')->formatInterval(REQUEST_TIME - $cron_last)),
       'cron_last' => $cron_last,
-    );
+    ];
     if (!empty(Settings::get('update_free_access'))) {
-      $data['update access'] = array(
+      $data['update access'] = [
         'value' => 'Not protected',
         'protected' => FALSE,
-      );
+      ];
     }
     else {
-      $data['update access'] = array(
+      $data['update access'] = [
         'value' => 'Protected',
         'protected' => TRUE,
-      );
+      ];
     }
     $data['update access']['title'] = 'Access to update.php';
     if (!\Drupal::moduleHandler()->moduleExists('update')) {
-      $data['update status'] = array(
+      $data['update status'] = [
         'value' => 'Not enabled',
-      );
+      ];
     }
     else {
-      $data['update status'] = array(
+      $data['update status'] = [
         'value' => 'Enabled',
-      );
+      ];
     }
     $data['update status']['title'] = 'Update notifications';
     return $data;
@@ -623,14 +627,16 @@ class SpiController extends ControllerBase {
    *   Count of admin users.
    */
   private function getAdminCount() {
-    $roles_name = array();
+    $roles_name = [];
     $get_roles = Role::loadMultiple();
     unset($get_roles[AccountInterface::ANONYMOUS_ROLE]);
-    $permission = array('administer permissions', 'administer users');
+    $permission = ['administer permissions', 'administer users'];
     foreach ($permission as $value) {
-      $filtered_roles = array_filter($get_roles, function ($role) use ($value) {
-        return $role->hasPermission($value);
-      });
+      $filtered_roles = array_filter(
+        $get_roles, function ($role) use ($value) {
+            return $role->hasPermission($value);
+        }
+      );
       foreach ($filtered_roles as $role_name => $data) {
         $roles_name[] = $role_name;
       }
@@ -639,7 +645,7 @@ class SpiController extends ControllerBase {
     if (!empty($roles_name)) {
       $roles_name_unique = array_unique($roles_name);
       $query = db_select('user__roles', 'ur');
-      $query->fields('ur', array('entity_id'));
+      $query->fields('ur', ['entity_id']);
       $query->condition('ur.bundle', 'user', '=');
       $query->condition('ur.deleted', '0', '=');
       $query->condition('ur.roles_target_id', $roles_name_unique, 'IN');
@@ -669,7 +675,7 @@ class SpiController extends ControllerBase {
   private function getSettingsPermissions() {
     $settings_permissions_read_only = TRUE;
     // http://en.wikipedia.org/wiki/File_system_permissions.
-    $writes = array('2', '3', '6', '7');
+    $writes = ['2', '3', '6', '7'];
     $settings_file = './' . DrupalKernel::findSitePath(\Drupal::request(), TRUE) . '/settings.php';
     $permissions = Unicode::substr(sprintf('%o', fileperms($settings_file)), -4);
 
@@ -687,7 +693,7 @@ class SpiController extends ControllerBase {
    * Determine if a path is a file type we care about for modificaitons.
    */
   private function isManifestType($path) {
-    $extensions = array(
+    $extensions = [
       'yml' => 1,
       'php' => 1,
       'php4' => 1,
@@ -703,11 +709,11 @@ class SpiController extends ControllerBase {
       'js' => 1,
       'info' => 1,
       'sh' => 1,
-      // SSL certificates.
+    // SSL certificates.
       'pem' => 1,
       'pl' => 1,
       'pm' => 1,
-    );
+    ];
     $pathinfo = pathinfo($path);
     return isset($pathinfo['extension']) && isset($extensions[$pathinfo['extension']]);
   }
@@ -747,11 +753,11 @@ class SpiController extends ControllerBase {
    */
   private function getVersionInfo() {
     $server = \Drupal::request()->server->all();
-    $ver = array();
+    $ver = [];
 
     $ver['base_version'] = \Drupal::VERSION;
     $install_root = $server['DOCUMENT_ROOT'] . base_path();
-    $ver['distribution']  = '';
+    $ver['distribution'] = '';
 
     // Determine if this puppy is Acquia Drupal.
     acquia_connector_load_versions();
@@ -767,7 +773,7 @@ class SpiController extends ControllerBase {
     // @todo: Review all D8 distributions!
     // Determine if we are looking at Pressflow.
     if (defined('CACHE_EXTERNAL')) {
-      $ver['distribution']  = 'Pressflow';
+      $ver['distribution'] = 'Pressflow';
       $press_version_file = $install_root . './PRESSFLOW.txt';
       if (is_file($press_version_file)) {
         $ver['pr']['version'] = trim(file_get_contents($press_version_file));
@@ -775,7 +781,7 @@ class SpiController extends ControllerBase {
     }
     // Determine if this is Open Atrium.
     elseif (is_dir($install_root . '/profiles/openatrium')) {
-      $ver['distribution']  = 'Open Atrium';
+      $ver['distribution'] = 'Open Atrium';
       $version_file = $install_root . 'profiles/openatrium/VERSION.txt';
       if (is_file($version_file)) {
         $ver['oa']['version'] = trim(file_get_contents($version_file));
@@ -783,11 +789,11 @@ class SpiController extends ControllerBase {
     }
     // Determine if this is Commons.
     elseif (is_dir($install_root . '/profiles/commons')) {
-      $ver['distribution']  = 'Commons';
+      $ver['distribution'] = 'Commons';
     }
     // Determine if this is COD.
     elseif (is_dir($install_root . '/profiles/cod')) {
-      $ver['distribution']  = 'COD';
+      $ver['distribution'] = 'COD';
     }
 
     return $ver;
@@ -801,7 +807,7 @@ class SpiController extends ControllerBase {
    * @param int $expire
    *   Expire time or null to use default of 1 day.
    */
-  public function dataStoreSet($data, $expire = NULL) {
+  public function dataStoreSet(array $data, $expire = NULL) {
     if (is_null($expire)) {
       $expire = REQUEST_TIME + (60 * 60 * 24);
     }
@@ -819,8 +825,8 @@ class SpiController extends ControllerBase {
    * @return array
    *   Stored data or false if no data is retrievable from storage.
    */
-  public function dataStoreGet($keys) {
-    $store = array();
+  public function dataStoreGet(array $keys) {
+    $store = [];
     foreach ($keys as $key) {
       if ($cache = \Drupal::cache()->get('acquia.spi.' . $key)) {
         if (!empty($cache->data)) {
@@ -851,7 +857,7 @@ class SpiController extends ControllerBase {
     }
 
     // Get some basic PHP vars.
-    $php_quantum = array(
+    $php_quantum = [
       'memory_limit' => ini_get('memory_limit'),
       'register_globals' => ini_get('register_globals'),
       'post_max_size' => ini_get('post_max_size'),
@@ -865,9 +871,9 @@ class SpiController extends ControllerBase {
       'session.cookie_lifetime' => ini_get('session.cookie_lifetime'),
       'newrelic.appname' => ini_get('newrelic.appname'),
       'sapi' => php_sapi_name(),
-    );
+    ];
 
-    $platform = array(
+    $platform = [
       'php'               => PHP_VERSION,
       'webserver_type'    => isset($webserver[1]) ? $webserver[1] : '',
       'webserver_version' => isset($webserver[2]) ? $webserver[2] : '',
@@ -876,10 +882,10 @@ class SpiController extends ControllerBase {
       'database_type'     => (string) $db_tasks->name(),
       'database_version'  => Database::getConnection()->version(),
       'system_type'       => php_uname('s'),
-      // php_uname() only accepts one character, so we need to concatenate
-      // ourselves.
+    // php_uname() only accepts one character, so we need to concatenate
+    // ourselves.
       'system_version'    => php_uname('r') . ' ' . php_uname('v') . ' ' . php_uname('m') . ' ' . php_uname('n'),
-    );
+    ];
 
     return $platform;
   }
@@ -896,10 +902,10 @@ class SpiController extends ControllerBase {
     $modules = system_rebuild_module_data();
     uasort($modules, 'system_sort_modules_by_info_name');
 
-    $result = array();
-    $keys_to_send = array('name', 'version', 'package', 'core', 'project');
+    $result = [];
+    $keys_to_send = ['name', 'version', 'package', 'core', 'project'];
     foreach ($modules as $module) {
-      $info = array();
+      $info = [];
       $info['status'] = $module->status;
       foreach ($keys_to_send as $key) {
         $info[$key] = isset($module->info[$key]) ? $module->info[$key] : '';
@@ -921,19 +927,19 @@ class SpiController extends ControllerBase {
    *   An associative array.
    */
   private function getQuantum() {
-    $quantum = array();
+    $quantum = [];
 
     if (\Drupal::moduleHandler()->moduleExists('node')) {
       // Get only published nodes.
-      $quantum['nodes'] = db_select('node_field_data', 'n')->fields('n', array('nid'))->condition('n.status', NODE_PUBLISHED)->countQuery()->execute()->fetchField();
+      $quantum['nodes'] = db_select('node_field_data', 'n')->fields('n', ['nid'])->condition('n.status', NODE_PUBLISHED)->countQuery()->execute()->fetchField();
     }
 
     // Get only active users.
-    $quantum['users'] = db_select('users_field_data', 'u')->fields('u', array('uid'))->condition('u.status', 1)->countQuery()->execute()->fetchField();
+    $quantum['users'] = db_select('users_field_data', 'u')->fields('u', ['uid'])->condition('u.status', 1)->countQuery()->execute()->fetchField();
 
     if (\Drupal::moduleHandler()->moduleExists('comment')) {
       // Get only active comments.
-      $quantum['comments'] = db_select('comment_field_data', 'c')->fields('c', array('cid'))->condition('c.status', 1)->countQuery()->execute()->fetchField();
+      $quantum['comments'] = db_select('comment_field_data', 'c')->fields('c', ['cid'])->condition('c.status', 1)->countQuery()->execute()->fetchField();
     }
 
     return $quantum;
@@ -955,9 +961,13 @@ class SpiController extends ControllerBase {
 
     if ($this->checkEnvironmentChange()) {
       \Drupal::logger('acquia spi')->error('SPI data not sent, site environment change detected.');
-      drupal_set_message(t('SPI data not sent, site environment change detected. Please <a href="@environment_change">indicate how you wish to proceed</a>.', array(
-        '@environment_change' => Url::fromRoute('acquia_connector.environment_change')->toString(),
-      )), 'error');
+      drupal_set_message(
+        t(
+            'SPI data not sent, site environment change detected. Please <a href="@environment_change">indicate how you wish to proceed</a>.', [
+              '@environment_change' => Url::fromRoute('acquia_connector.environment_change')->toString(),
+            ]
+        ), 'error'
+      );
       return FALSE;
     }
 
@@ -986,11 +996,11 @@ class SpiController extends ControllerBase {
   public function send(Request $request) {
     // Mark this page as being uncacheable.
     \Drupal::service('page_cache_kill_switch')->trigger();
-    $method = ACQUIA_SPI_METHOD_CALLBACK;
+    $method = ACQUIA_CONNECTOR_SPI_METHOD_CALLBACK;
 
     // Insight's set variable feature will pass method insight.
-    if ($request->query->has('method') && ($request->query->get('method') === ACQUIA_SPI_METHOD_INSIGHT)) {
-      $method = ACQUIA_SPI_METHOD_INSIGHT;
+    if ($request->query->has('method') && ($request->query->get('method') === ACQUIA_CONNECTOR_SPI_METHOD_INSIGHT)) {
+      $method = ACQUIA_CONNECTOR_SPI_METHOD_INSIGHT;
     }
 
     $response = $this->sendFullSpi($method);
@@ -1020,7 +1030,7 @@ class SpiController extends ControllerBase {
    * @param array $response
    *   Response array from NSPI.
    */
-  public function spiProcessMessages($response) {
+  public function spiProcessMessages(array $response) {
     if (empty($response['body'])) {
       drupal_set_message($this->t('Error sending SPI data. Consult the logs for more information.'), 'error');
       return;
@@ -1056,7 +1066,7 @@ class SpiController extends ControllerBase {
    * @param array $spi_response
    *   Array response from SpiController->send().
    */
-  private function handleServerResponse($spi_response) {
+  private function handleServerResponse(array $spi_response) {
 
     $config_set = \Drupal::configFactory()->getEditable('acquia_connector.settings');
     $changed_action = $this->config('acquia_connector.settings')->get('spi.environment_changed_action');
@@ -1074,7 +1084,7 @@ class SpiController extends ControllerBase {
       $config_set->clear('spi.site_uuid')->save();
     }
 
-    $spi_environment_changes = isset($spi_response['body']['spi_environment_changes']) ? Json::decode($spi_response['body']['spi_environment_changes']) : array();
+    $spi_environment_changes = isset($spi_response['body']['spi_environment_changes']) ? Json::decode($spi_response['body']['spi_environment_changes']) : [];
     $site_blocked = array_key_exists('blocked', $spi_environment_changes) || !empty($spi_response['site_revoked']);
 
     // Address any actions taken based on a site environment change.
@@ -1109,7 +1119,7 @@ class SpiController extends ControllerBase {
     // Log messages.
     $messages = isset($spi_response['body']['nspi_messages']) ? $spi_response['body']['nspi_messages'] : FALSE;
     if ($messages !== FALSE) {
-      \Drupal::logger('acquia spi')->notice('SPI update server response messages: @messages', array('@messages' => implode(', ', $messages)));
+      \Drupal::logger('acquia spi')->notice('SPI update server response messages: @messages', ['@messages' => implode(', ', $messages)]);
     }
   }
 
@@ -1133,24 +1143,26 @@ class SpiController extends ControllerBase {
     }
     else {
       $response_data = $response;
-      $expected_data_types = array(
+      $expected_data_types = [
         'drupal_version' => 'string',
         'timestamp' => 'string',
         'acquia_spi_variables' => 'array',
-      );
+      ];
       // Make sure that $response_data contains everything expected.
       foreach ($expected_data_types as $key => $values) {
         if (!array_key_exists($key, $response_data) || gettype($response_data[$key]) != $expected_data_types[$key]) {
           \Drupal::logger('acquia spi')
-            ->error('Received SPI data definition does not match expected pattern while checking "@key". Received and expected data: @data', array(
-              '@key' => $key,
-              '@data' => var_export(array_merge(array('expected_data' => $expected_data_types), array('response_data' => $response_data)), TRUE),
-            ));
+            ->error(
+          'Received SPI data definition does not match expected pattern while checking "@key". Received and expected data: @data', [
+            '@key' => $key,
+            '@data' => var_export(array_merge(['expected_data' => $expected_data_types], ['response_data' => $response_data]), TRUE),
+          ]
+          );
           return FALSE;
         }
       }
       if ($response_data['drupal_version'] != $core_version) {
-        \Drupal::logger('acquia spi')->notice('Received SPI data definition does not match with current version of your Drupal installation. Data received for Drupal @version', array('@version' => $response_data['drupal_version']));
+        \Drupal::logger('acquia spi')->notice('Received SPI data definition does not match with current version of your Drupal installation. Data received for Drupal @version', ['@version' => $response_data['drupal_version']]);
         return FALSE;
       }
     }
@@ -1165,8 +1177,9 @@ class SpiController extends ControllerBase {
         // Count if received from NSPI optional variable is not present in old
         // local SPI definition or if it already was in old SPI definition, but
         // was not optional.
-        if ($new_var['optional'] && !array_key_exists($new_var_name, $old_vars) ||
-          $new_var['optional'] && isset($old_vars[$new_var_name]) && !$old_vars[$new_var_name]['optional']) {
+        if ($new_var['optional'] && !array_key_exists($new_var_name, $old_vars)
+        || $new_var['optional'] && isset($old_vars[$new_var_name]) && !$old_vars[$new_var_name]['optional']
+        ) {
           $new_optional_vars++;
         }
       }

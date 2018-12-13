@@ -20,7 +20,7 @@ class ModuleDataController extends ControllerBase {
   /**
    * Send a file's contents to the requestor.
    */
-  public function sendModuleData($data = array()) {
+  public function sendModuleData($data = []) {
     $request = \Drupal::request();
     if (empty($data)) {
       $data = json_decode($request->getContent(), TRUE);
@@ -59,7 +59,7 @@ class ModuleDataController extends ControllerBase {
    * @return bool
    *   TRUE if request is valid, FALSE otherwise.
    */
-  public function isValidRequest($data, $message) {
+  public function isValidRequest(array $data, $message) {
     $storage = new Storage();
     $key = $storage->getKey();
     if (!isset($data['authenticator']) || !isset($data['authenticator']['time']) || !isset($data['authenticator']['nonce'])) {
@@ -96,14 +96,14 @@ class ModuleDataController extends ControllerBase {
 
       // Log the request if validation failed and debug is enabled.
       if ($this->config('acquia_connector.settings')->get('debug')) {
-        $info = array(
+        $info = [
           'data' => $data,
           'get' => $request->query->all(),
           'server' => $request->server->all(),
           'request' => $request->request->all(),
-        );
+        ];
 
-        \Drupal::logger('acquia module data')->notice('Site Module Data request: @data', array('@data' => var_export($info, TRUE)));
+        \Drupal::logger('acquia module data')->notice('Site Module Data request: @data', ['@data' => var_export($info, TRUE)]);
       }
     }
 

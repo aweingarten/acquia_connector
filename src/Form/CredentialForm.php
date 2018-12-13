@@ -29,7 +29,7 @@ class CredentialForm extends ConfigFormBase {
    *
    * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
    *   The factory for configuration objects.
-   * @param Client $client
+   * @param \Drupal\acquia_connector\Client $client
    *   The Acquia client.
    */
   public function __construct(ConfigFactoryInterface $config_factory, Client $client) {
@@ -42,8 +42,8 @@ class CredentialForm extends ConfigFormBase {
    */
   public static function create(ContainerInterface $container) {
     return new static(
-      $container->get('config.factory'),
-      $container->get('acquia_connector.client')
+    $container->get('config.factory'),
+    $container->get('acquia_connector.client')
     );
   }
 
@@ -67,28 +67,28 @@ class CredentialForm extends ConfigFormBase {
   public function buildForm(array $form, FormStateInterface $form_state) {
 
     $storage = new Storage();
-    $form['#prefix'] = $this->t('Enter your product keys from your <a href=":net">application overview</a> or <a href=":url">log in</a> to connect your site to Acquia Insight.', array(':net' => Url::fromUri('https://cloud.acquia.com')->getUri(), ':url' => \Drupal::url('acquia_connector.setup')));
+    $form['#prefix'] = $this->t('Enter your product keys from your <a href=":net">application overview</a> or <a href=":url">log in</a> to connect your site to Acquia Insight.', [':net' => Url::fromUri('https://cloud.acquia.com')->getUri(), ':url' => \Drupal::url('acquia_connector.setup')]);
 
-    $form['acquia_identifier'] = array(
+    $form['acquia_identifier'] = [
       '#type' => 'textfield',
       '#title' => $this->t('Identifier'),
       '#default_value' => $storage->getIdentifier(),
       '#required' => TRUE,
-    );
-    $form['acquia_key'] = array(
+    ];
+    $form['acquia_key'] = [
       '#type' => 'textfield',
       '#title' => $this->t('Network key'),
       '#default_value' => $storage->getKey(),
       '#required' => TRUE,
-    );
-    $form['actions'] = array('#type' => 'actions');
-    $form['actions']['submit'] = array(
+    ];
+    $form['actions'] = ['#type' => 'actions'];
+    $form['actions']['submit'] = [
       '#type' => 'submit',
       '#value' => $this->t('Connect'),
-    );
-    $form['actions']['signup'] = array(
-      '#markup' => $this->t('Need a subscription? <a href=":url">Get one</a>.', array(':url' => Url::fromUri('https://www.acquia.com/acquia-cloud-free')->getUri())),
-    );
+    ];
+    $form['actions']['signup'] = [
+      '#markup' => $this->t('Need a subscription? <a href=":url">Get one</a>.', [':url' => Url::fromUri('https://www.acquia.com/acquia-cloud-free')->getUri()]),
+    ];
 
     return $form;
   }
@@ -100,8 +100,9 @@ class CredentialForm extends ConfigFormBase {
     try {
       $response = $this->client->nspiCall(
         '/agent-api/subscription',
-        array('identifier' => trim($form_state->getValue('acquia_identifier'))),
-        trim($form_state->getValue('acquia_key')));
+        ['identifier' => trim($form_state->getValue('acquia_identifier'))],
+        trim($form_state->getValue('acquia_key'))
+      );
     }
     catch (ConnectorException $e) {
       // Set form error to prevent switching to the next page.

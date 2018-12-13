@@ -62,11 +62,13 @@ class AcquiaConnectorModuleTest extends WebTestBase {
 
     global $base_url;
     // Create and log in our privileged user.
-    $this->privilegedUser = $this->drupalCreateUser([
-      'administer site configuration',
-      'access administration pages',
-      'access toolbar',
-    ]);
+    $this->privilegedUser = $this->drupalCreateUser(
+        [
+          'administer site configuration',
+          'access administration pages',
+          'access toolbar',
+        ]
+    );
     $this->drupalLogin($this->privilegedUser);
 
     // Create a user that has a Network subscription.
@@ -142,16 +144,19 @@ class AcquiaConnectorModuleTest extends WebTestBase {
     }
   }
 
+  /**
+   * Kicks off all Acquia connector tests.
+   */
   public function testAll() {
-    $this->_testAcquiaConnectorGetConnected();
-    $this->_testAcquiaConnectorSubscription();
-    $this->_testAcquiaConnectorSiteStatus();
+    $this->testAcquiaConnectorGetConnected();
+    $this->testAcquiaConnectorSubscription();
+    $this->testAcquiaConnectorSiteStatus();
   }
 
   /**
    * Test get connected.
    */
-  public function _testAcquiaConnectorGetConnected() {
+  private function testAcquiaConnectorGetConnected() {
     // Check for call to get connected.
     $this->drupalGet('admin');
     $this->assertText($this->acquiaConnectorStrings('free'), 'The explanation of services text exists');
@@ -250,7 +255,7 @@ class AcquiaConnectorModuleTest extends WebTestBase {
   /**
    * Test Connector subscription methods.
    */
-  public function _testAcquiaConnectorSubscription() {
+  private function testAcquiaConnectorSubscription() {
     $subscription = new Subscription();
     // Starts as inactive.
     $is_active = $subscription->isActive();
@@ -258,7 +263,7 @@ class AcquiaConnectorModuleTest extends WebTestBase {
     // Confirm HTTP request count is 0 because without credentials no request
     // should have been made.
     $this->assertIdentical(\Drupal::state()->get('acquia_connector_test_request_count', 0), 0);
-    $check_subscription  = $subscription->update();
+    $check_subscription = $subscription->update();
     \Drupal::state()->resetCache();
     $this->assertFalse($check_subscription, 'Subscription is currently false.');
     // Confirm HTTP request count is still 0.
@@ -276,7 +281,7 @@ class AcquiaConnectorModuleTest extends WebTestBase {
     $is_active = $subscription->isActive();
     $this->assertFalse($is_active, 'Subscription is not active after failed attempt to connect.');
     $this->assertIdentical(\Drupal::state()->get('acquia_connector_test_request_count', 0), 1, 'Still have made only 1 HTTP request');
-    $check_subscription  = $subscription->update();
+    $check_subscription = $subscription->update();
     \Drupal::state()->resetCache();
     $this->assertFalse($check_subscription, 'Subscription is false after failed attempt to connect.');
     $this->assertIdentical(\Drupal::state()->get('acquia_connector_test_request_count', 0), 1, 'Still have made only 1 HTTP request');
@@ -355,7 +360,7 @@ class AcquiaConnectorModuleTest extends WebTestBase {
   /**
    * Tests the site status callback.
    */
-  public function _testAcquiaConnectorSiteStatus() {
+  private function testAcquiaConnectorSiteStatus() {
     $uuid = '0dee0d07-4032-44ea-a2f2-84182dc10d54';
     $test_url = "https://insight.acquia.com/node/uuid/{$uuid}/dashboard";
     $test_data = [
@@ -390,7 +395,7 @@ class AcquiaConnectorModuleTest extends WebTestBase {
   /**
    * Tests the SPI change form.
    */
-  public function _testSpiChangeForm() {
+  private function testSpiChangeForm() {
     // Connect site on key and id.
     $edit_fields = [
       'acquia_identifier' => $this->acqtestId,
@@ -512,12 +517,4 @@ class AcquiaConnectorModuleTest extends WebTestBase {
  * @package Drupal\acquia_connector\Tests
  */
 class StatusControllerTest extends StatusController {
-
-  /**
-   * {@inheritdoc}
-   */
-  public function getIdFromSub($sub_data) {
-    return parent::getIdFromSub($sub_data);
-  }
-
 }
